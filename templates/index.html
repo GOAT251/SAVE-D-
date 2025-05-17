@@ -105,327 +105,358 @@
             background-clip: text;
             color: transparent;
         }
+        /* Sidebar styles */
+        .sidebar {
+            width: 80px;
+            transition: width 0.3s ease;
+            overflow: hidden;
+            z-index: 100;
+        }
+        .sidebar:hover {
+            width: 240px;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            color: #e2e8f0;
+            text-decoration: none;
+            transition: background 0.3s ease;
+            border-radius: 0.5rem;
+            margin: 0.5rem;
+        }
+        .sidebar-link:hover, .sidebar-link.active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar-icon {
+            min-width: 2.5rem;
+            display: flex;
+            justify-content: center;
+        }
+        .sidebar-text {
+            margin-left: 1rem;
+            white-space: nowrap;
+        }
+        /* Stats card for dashboard */
+        .stats-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
     </style>
 </head>
-<body>
-    <!-- Navigation -->
-    <nav class="glass-effect fixed w-full z-50 px-6 py-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <img src="/static/images/logo.svg" alt="MOG AI Logo" class="h-12 w-12">
-                <span class="text-3xl font-bold gradient-text">M.O.G AI</span>
-            </div>
-            <div class="hidden md:flex space-x-8">
-                <a href="#features" class="nav-link">Fonctionnalités</a>
-                <a href="#how-it-works" class="nav-link">Comment ça marche</a>
-                <a href="#pricing" class="nav-link">Tarifs</a>
-                <a href="#faq" class="nav-link">FAQ</a>
-            </div>
-            <div class="flex items-center space-x-4">
-                <a href="#" class="btn-gradient px-6 py-2 rounded-lg">Connexion</a>
-            </div>
+<body class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar glass-effect h-screen flex flex-col">
+        <div class="p-4 flex items-center justify-center">
+            <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="MOG AI Logo" class="h-12 w-12">
+            <span class="sidebar-text text-xl font-bold gradient-text">M.O.G AI</span>
         </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="pt-32 pb-20 px-4">
-        <div class="container mx-auto text-center max-w-4xl">
-            <h1 class="text-6xl font-bold mb-6">
-                <span class="gradient-text">M.O.G AI</span>
-                <span class="block text-3xl mt-2">Mastering Optical Grafting</span>
-            </h1>
-            <p class="text-xl text-gray-300 mb-12">
-                Transformez vos photos avec notre technologie de pointe en intelligence artificielle.
-                Créez des images uniques et professionnelles en quelques secondes.
-            </p>
-            <div class="flex justify-center space-x-4">
-                <a href="#try-it" class="btn-gradient px-8 py-4 rounded-xl text-lg font-semibold">
-                    Essayer Maintenant
-                </a>
-                <a href="#how-it-works" class="glass-effect px-8 py-4 rounded-xl text-lg font-semibold">
-                    En savoir plus
-                </a>
-            </div>
+        <div class="flex-1 flex flex-col mt-8">
+            <a href="{{ url_for('web.index') }}" class="sidebar-link active">
+                <div class="sidebar-icon"><i class="fas fa-home text-xl"></i></div>
+                <span class="sidebar-text">Accueil</span>
+            </a>
+            <a href="{{ url_for('web.faceswap') }}" class="sidebar-link">
+                <div class="sidebar-icon"><i class="fas fa-exchange-alt text-xl"></i></div>
+                <span class="sidebar-text">Face Swap</span>
+            </a>
+            <a href="{{ url_for('web.dashboard') }}" class="sidebar-link">
+                <div class="sidebar-icon"><i class="fas fa-chart-line text-xl"></i></div>
+                <span class="sidebar-text">Dashboard</span>
+            </a>
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-icon"><i class="fas fa-cog text-xl"></i></div>
+                <span class="sidebar-text">Paramètres</span>
+            </a>
         </div>
-    </section>
+        <div class="mt-auto mb-8">
+            <a href="#" class="sidebar-link">
+                <div class="sidebar-icon"><i class="fas fa-question-circle text-xl"></i></div>
+                <span class="sidebar-text">Aide</span>
+            </a>
+        </div>
+    </aside>
 
-    <!-- Features Section -->
-    <section id="features" class="py-20 px-4">
-        <div class="container mx-auto">
-            <h2 class="text-4xl font-bold text-center mb-12 gradient-text">Fonctionnalités Principales</h2>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="feature-card glass-effect p-6 rounded-xl">
-                    <div class="text-4xl mb-4 gradient-text">
-                        <i class="fas fa-magic"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">IA Avancée</h3>
-                    <p class="text-gray-300">Technologie de pointe pour des résultats naturels et réalistes.</p>
-                </div>
-                <div class="feature-card glass-effect p-6 rounded-xl">
-                    <div class="text-4xl mb-4 gradient-text">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Traitement Rapide</h3>
-                    <p class="text-gray-300">Résultats en quelques secondes grâce à notre infrastructure optimisée.</p>
-                </div>
-                <div class="feature-card glass-effect p-6 rounded-xl">
-                    <div class="text-4xl mb-4 gradient-text">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">Sécurité Maximale</h3>
-                    <p class="text-gray-300">Vos images sont traitées de manière sécurisée et confidentielle.</p>
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+        <!-- Navigation -->
+        <nav class="glass-effect sticky top-0 z-40 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold gradient-text">Accueil</h1>
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="btn-gradient px-4 py-2 rounded-lg">Connexion</a>
                 </div>
             </div>
-        </div>
-    </section>
+        </nav>
 
-    <!-- Main Tool Section -->
-    <section id="try-it" class="py-20 px-4">
-        <div class="container mx-auto max-w-5xl">
-            <div class="gradient-border">
-                <div class="glass-effect p-8 rounded-2xl relative overflow-hidden">
-                    <!-- Progress Bar -->
-                    <div class="mb-8">
-                        <div class="progress-bar">
-                            <div class="progress-bar-fill" id="progressBar"></div>
-                        </div>
-                        <div class="text-center mt-2 text-sm text-gray-400" id="progressText">
-                            En attente des images...
+        <!-- Hero Section -->
+        <section class="pt-8 pb-20 px-4">
+            <div class="container mx-auto text-center max-w-4xl">
+                <h1 class="text-6xl font-bold mb-6">
+                    <span class="gradient-text">M.O.G AI</span>
+                    <span class="block text-3xl mt-2">Mastering Optical Grafting</span>
+                </h1>
+                <p class="text-xl text-gray-300 mb-12">
+                    Transformez vos photos avec notre technologie de pointe en intelligence artificielle.
+                    Notre plateforme propose des services avancés de manipulation et génération d'images.
+                </p>
+                <div class="flex justify-center space-x-4">
+                    <a href="{{ url_for('web.faceswap') }}" class="btn-gradient px-8 py-4 rounded-xl text-lg font-semibold">
+                        Essayer Face Swap
+                    </a>
+                    <a href="#features" class="glass-effect px-8 py-4 rounded-xl text-lg font-semibold">
+                        Nos services
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Preview Section -->
+        <section class="py-16 px-4 bg-gradient-to-b from-transparent to-black/20">
+            <div class="container mx-auto max-w-6xl">
+                <h2 class="text-4xl font-bold text-center mb-12 gradient-text">Aperçu de la Plateforme</h2>
+                <div class="grid md:grid-cols-4 gap-6 mb-10">
+                    <div class="stats-card">
+                        <h3 class="text-gray-400 text-sm">Traitements</h3>
+                        <p class="text-3xl font-bold mt-2">1,254</p>
+                        <div class="flex items-center mt-4 text-green-500">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>12.5%</span>
                         </div>
                     </div>
-
-                    <div class="grid md:grid-cols-2 gap-8">
-                        <div class="space-y-6">
-                            <div class="upload-zone p-6 rounded-xl text-center cursor-pointer hover:bg-opacity-10 bg-white bg-opacity-5">
-                                <label class="block cursor-pointer">
-                                    <span class="text-lg font-medium text-gray-200">Image source</span>
-                                    <p class="text-sm text-gray-400 mt-2">Visage à utiliser</p>
-                                    <input type="file" id="sourceImage" accept="image/*" class="hidden">
-                                    <div id="sourcePreview" class="mt-4 rounded-lg overflow-hidden hidden">
-                                        <img class="w-full h-48 object-cover" src="" alt="Aperçu">
-                                    </div>
-                                    <div class="mt-4 flex items-center justify-center">
-                                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <div class="upload-zone p-6 rounded-xl text-center cursor-pointer hover:bg-opacity-10 bg-white bg-opacity-5">
-                                <label class="block cursor-pointer">
-                                    <span class="text-lg font-medium text-gray-200">Image cible</span>
-                                    <p class="text-sm text-gray-400 mt-2">Où placer le visage</p>
-                                    <input type="file" id="targetImage" accept="image/*" class="hidden">
-                                    <div id="targetPreview" class="mt-4 rounded-lg overflow-hidden hidden">
-                                        <img class="w-full h-48 object-cover" src="" alt="Aperçu">
-                                    </div>
-                                    <div class="mt-4 flex items-center justify-center">
-                                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
-                                    </div>
-                                </label>
-                            </div>
+                    <div class="stats-card">
+                        <h3 class="text-gray-400 text-sm">Utilisateurs</h3>
+                        <p class="text-3xl font-bold mt-2">356</p>
+                        <div class="flex items-center mt-4 text-green-500">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>8.2%</span>
                         </div>
-
-                        <div class="space-y-6">
+                    </div>
+                    <div class="stats-card">
+                        <h3 class="text-gray-400 text-sm">Face Swaps</h3>
+                        <p class="text-3xl font-bold mt-2">824</p>
+                        <div class="flex items-center mt-4 text-green-500">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>15.3%</span>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <h3 class="text-gray-400 text-sm">Satisfaction</h3>
+                        <p class="text-3xl font-bold mt-2">98%</p>
+                        <div class="flex items-center mt-4 text-green-500">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>2.4%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="gradient-border">
+                    <div class="glass-effect p-8 rounded-2xl">
+                        <h3 class="text-2xl font-semibold mb-6 gradient-text">Dernières Innovations</h3>
+                        <div class="grid md:grid-cols-3 gap-8">
                             <div class="glass-effect p-6 rounded-xl">
-                                <h3 class="text-xl font-semibold mb-4 text-center">
-                                    <span class="gradient-text">
-                                        Prix: 5.00 € (Mode démo)
-                                    </span>
-                                </h3>
-                                <div id="card-element" class="p-4 rounded-lg bg-white bg-opacity-5">
-                                    Mode démo - pas de paiement requis
+                                <div class="text-4xl mb-4 text-blue-500">
+                                    <i class="fas fa-sync-alt"></i>
                                 </div>
+                                <h4 class="text-xl font-semibold mb-2">Face Swap IA</h4>
+                                <p class="text-gray-300">Échangez les visages entre deux images avec une qualité supérieure.</p>
+                                <a href="{{ url_for('web.faceswap') }}" class="block mt-4 text-blue-400 hover:underline">
+                                    <i class="fas fa-arrow-right mr-1"></i> Essayer
+                                </a>
                             </div>
-
-                            <button id="generateBtn" class="w-full btn-gradient py-4 rounded-xl text-lg font-semibold flex items-center justify-center space-x-2">
-                                <i class="fas fa-magic"></i>
-                                <span>Générer</span>
-                            </button>
-
-                            <div id="result" class="hidden">
-                                <div class="glass-effect p-4 rounded-xl">
-                                    <h4 class="text-lg font-semibold mb-2">Résultat</h4>
-                                    <img id="resultImage" class="w-full rounded-lg" src="" alt="Image générée">
+                            <div class="glass-effect p-6 rounded-xl">
+                                <div class="text-4xl mb-4 text-purple-500">
+                                    <i class="fas fa-paint-brush"></i>
                                 </div>
+                                <h4 class="text-xl font-semibold mb-2">Style Transfer</h4>
+                                <p class="text-gray-300">Appliquez le style d'une image à une autre photo.</p>
+                                <a href="#" class="block mt-4 text-purple-400 hover:underline">
+                                    <i class="fas fa-arrow-right mr-1"></i> Bientôt disponible
+                                </a>
+                            </div>
+                            <div class="glass-effect p-6 rounded-xl">
+                                <div class="text-4xl mb-4 text-green-500">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                                <h4 class="text-xl font-semibold mb-2">Générateur d'Images</h4>
+                                <p class="text-gray-300">Créez des images inédites à partir de descriptions textuelles.</p>
+                                <a href="#" class="block mt-4 text-green-400 hover:underline">
+                                    <i class="fas fa-arrow-right mr-1"></i> Bientôt disponible
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- How It Works Section -->
-    <section id="how-it-works" class="py-20 px-4 bg-gradient-to-b from-transparent to-black/20">
-        <div class="container mx-auto max-w-4xl">
-            <h2 class="text-4xl font-bold text-center mb-12 gradient-text">Comment ça marche</h2>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl">1</span>
+        <!-- Features Section -->
+        <section id="features" class="py-20 px-4">
+            <div class="container mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-12 gradient-text">Fonctionnalités Principales</h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="feature-card glass-effect p-6 rounded-xl">
+                        <div class="text-4xl mb-4 gradient-text">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">IA Avancée</h3>
+                        <p class="text-gray-300">Technologie de pointe pour des résultats naturels et réalistes.</p>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">Uploadez vos images</h3>
-                    <p class="text-gray-300">Sélectionnez l'image source et l'image cible pour le face swap.</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl">2</span>
+                    <div class="feature-card glass-effect p-6 rounded-xl">
+                        <div class="text-4xl mb-4 gradient-text">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Traitement Rapide</h3>
+                        <p class="text-gray-300">Résultats en quelques secondes grâce à notre infrastructure optimisée.</p>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">Notre IA travaille</h3>
-                    <p class="text-gray-300">Notre technologie M.O.G analyse et fusionne les images de manière naturelle.</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl">3</span>
+                    <div class="feature-card glass-effect p-6 rounded-xl">
+                        <div class="text-4xl mb-4 gradient-text">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Sécurité Maximale</h3>
+                        <p class="text-gray-300">Vos images sont traitées de manière sécurisée et confidentielle.</p>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">Résultat Final</h3>
-                    <p class="text-gray-300">Obtenez votre image transformée en quelques secondes.</p>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Pricing Section -->
-    <section id="pricing" class="py-20 px-4">
-        <div class="container mx-auto max-w-6xl">
-            <h2 class="text-4xl font-bold text-center mb-12 gradient-text">Nos Forfaits</h2>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="glass-effect p-8 rounded-xl">
-                    <h3 class="text-2xl font-bold mb-4">Essai</h3>
-                    <div class="text-4xl font-bold mb-6">
-                        <span class="gradient-text">Gratuit</span>
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="py-20 px-4 bg-gradient-to-b from-transparent to-black/20">
+            <div class="container mx-auto max-w-4xl">
+                <h2 class="text-4xl font-bold text-center mb-12 gradient-text">Comment ça marche</h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl">1</span>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Choix du service</h3>
+                        <p class="text-gray-300">Sélectionnez le service IA dont vous avez besoin dans notre plateforme.</p>
                     </div>
-                    <ul class="space-y-4 mb-8">
-                        <li><i class="fas fa-check text-green-500 mr-2"></i> 2 transformations</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i> Qualité standard</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i> Support basique</li>
-                    </ul>
-                    <button class="w-full btn-gradient py-3 rounded-lg">Commencer</button>
-                </div>
-                <div class="glass-effect p-8 rounded-xl transform scale-105 border-2 border-blue-500">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                        <span class="bg-blue-500 text-white px-4 py-1 rounded-full text-sm">Populaire</span>
+                    <div class="text-center">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl">2</span>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Notre IA travaille</h3>
+                        <p class="text-gray-300">Notre technologie M.O.G analyse et traite vos données de manière optimale.</p>
                     </div>
-                    <h3 class="text-2xl font-bold mb-4">Pro</h3>
-                    <div class="text-4xl font-bold mb-6">
-                        <span class="gradient-text">19.99€</span>
-                        <span class="text-lg text-gray-400">/mois</span>
+                    <div class="text-center">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl">3</span>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Résultat Final</h3>
+                        <p class="text-gray-300">Obtenez vos résultats transformés en quelques secondes.</p>
                     </div>
-                    <ul class="space-y-4 mb-8">
-                        <li><i class="fas fa-check text-green-500 mr-2"></i> 50 transformations</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i> Haute qualité</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i> Support prioritaire</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i> Pas de filigrane</li>
-                    </ul>
-                    <button class="w-full btn-gradient py-3 rounded-lg">S'abonner</button>
-                </div>
-                <div class="glass-effect p-8 rounded-xl">
-                    <h3 class="text-2xl font-bold mb-4">Entreprise</h3>
-                    <div class="text-4xl font-bold mb-6">
-                        <span class="gradient-text">Sur mesure</span>
-                    </div>
-                    <ul class="space-y-4 mb-8">
-                        <li><i class="fas fa-check text-green-500 mr-2"></i> Transformations illimitées</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i> Qualité maximale</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i> API dédiée</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i> Support 24/7</li>
-                    </ul>
-                    <button class="w-full btn-gradient py-3 rounded-lg">Contacter</button>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- FAQ Section -->
-    <section id="faq" class="py-20 px-4">
-        <div class="container mx-auto max-w-3xl">
-            <h2 class="text-4xl font-bold text-center mb-12 gradient-text">Questions Fréquentes</h2>
-            <div class="space-y-6">
-                <div class="glass-effect p-6 rounded-xl">
-                    <h3 class="text-xl font-semibold mb-2">Comment fonctionne M.O.G AI ?</h3>
-                    <p class="text-gray-300">Notre technologie utilise des algorithmes avancés d'intelligence artificielle pour analyser et fusionner les visages de manière naturelle et réaliste.</p>
-                </div>
-                <div class="glass-effect p-6 rounded-xl">
-                    <h3 class="text-xl font-semibold mb-2">Mes images sont-elles sécurisées ?</h3>
-                    <p class="text-gray-300">Absolument. Toutes les images sont traitées de manière sécurisée et supprimées de nos serveurs après traitement.</p>
-                </div>
-                <div class="glass-effect p-6 rounded-xl">
-                    <h3 class="text-xl font-semibold mb-2">Quelle est la qualité des résultats ?</h3>
-                    <p class="text-gray-300">Nous garantissons des résultats de haute qualité grâce à notre technologie de pointe et nos modèles d'IA optimisés.</p>
+        <!-- Pricing Section -->
+        <section id="pricing" class="py-20 px-4">
+            <div class="container mx-auto max-w-6xl">
+                <h2 class="text-4xl font-bold text-center mb-12 gradient-text">Nos Forfaits</h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="glass-effect p-8 rounded-xl">
+                        <h3 class="text-2xl font-bold mb-4">Essai</h3>
+                        <div class="text-4xl font-bold mb-6">
+                            <span class="gradient-text">Gratuit</span>
+                        </div>
+                        <ul class="space-y-4 mb-8">
+                            <li><i class="fas fa-check text-green-500 mr-2"></i> 2 traitements</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i> Qualité standard</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i> Support basique</li>
+                        </ul>
+                        <button class="w-full btn-gradient py-3 rounded-lg">Commencer</button>
+                    </div>
+                    <div class="glass-effect p-8 rounded-xl transform scale-105 border-2 border-blue-500">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                            <span class="bg-blue-500 text-white px-4 py-1 rounded-full text-sm">Populaire</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Pro</h3>
+                        <div class="text-4xl font-bold mb-6">
+                            <span class="gradient-text">19.99€</span>
+                            <span class="text-lg text-gray-400">/mois</span>
+                        </div>
+                        <ul class="space-y-4 mb-8">
+                            <li><i class="fas fa-check text-green-500 mr-2"></i> 50 traitements</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i> Haute qualité</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i> Support prioritaire</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i> Pas de filigrane</li>
+                        </ul>
+                        <button class="w-full btn-gradient py-3 rounded-lg">S'abonner</button>
+                    </div>
+                    <div class="glass-effect p-8 rounded-xl">
+                        <h3 class="text-2xl font-bold mb-4">Entreprise</h3>
+                        <div class="text-4xl font-bold mb-6">
+                            <span class="gradient-text">Sur mesure</span>
+                        </div>
+                        <ul class="space-y-4 mb-8">
+                            <li><i class="fas fa-check text-green-500 mr-2"></i> Traitements illimitées</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i> Qualité maximale</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i> API dédiée</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i> Support 24/7</li>
+                        </ul>
+                        <button class="w-full btn-gradient py-3 rounded-lg">Contacter</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Footer -->
-    <footer class="py-12 px-4 bg-black/20">
-        <div class="container mx-auto">
-            <div class="grid md:grid-cols-4 gap-8">
-                <div>
-                    <h4 class="text-xl font-bold mb-4 gradient-text">M.O.G AI</h4>
-                    <p class="text-gray-400">Transformez vos photos avec la puissance de l'intelligence artificielle.</p>
+        <!-- Footer -->
+        <footer class="py-12 px-4 bg-black/20">
+            <div class="container mx-auto">
+                <div class="grid md:grid-cols-4 gap-8">
+                    <div>
+                        <h4 class="text-xl font-bold mb-4 gradient-text">M.O.G AI</h4>
+                        <p class="text-gray-400">Transformez vos photos avec la puissance de l'intelligence artificielle.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold mb-4">Liens</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#features" class="text-gray-400 hover:text-white">Fonctionnalités</a></li>
+                            <li><a href="#pricing" class="text-gray-400 hover:text-white">Tarifs</a></li>
+                            <li><a href="#faq" class="text-gray-400 hover:text-white">FAQ</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold mb-4">Légal</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white">Conditions d'utilisation</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white">Politique de confidentialité</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white">Mentions légales</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold mb-4">Contact</h4>
+                        <ul class="space-y-2">
+                            <li><a href="mailto:contact@mogai.com" class="text-gray-400 hover:text-white">contact@mogai.com</a></li>
+                            <li class="text-gray-400">Support 24/7</li>
+                        </ul>
+                    </div>
                 </div>
-                <div>
-                    <h4 class="text-xl font-bold mb-4">Liens</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#features" class="text-gray-400 hover:text-white">Fonctionnalités</a></li>
-                        <li><a href="#pricing" class="text-gray-400 hover:text-white">Tarifs</a></li>
-                        <li><a href="#faq" class="text-gray-400 hover:text-white">FAQ</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-xl font-bold mb-4">Légal</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white">Conditions d'utilisation</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Politique de confidentialité</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Mentions légales</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-xl font-bold mb-4">Contact</h4>
-                    <ul class="space-y-2">
-                        <li><a href="mailto:contact@mogai.com" class="text-gray-400 hover:text-white">contact@mogai.com</a></li>
-                        <li class="text-gray-400">Support 24/7</li>
-                    </ul>
+                <div class="border-t border-gray-800 mt-12 pt-8 text-center">
+                    <p class="text-gray-400">&copy; 2024 M.O.G AI - Tous droits réservés</p>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-12 pt-8 text-center">
-                <p class="text-gray-400">&copy; 2024 M.O.G AI - Tous droits réservés</p>
-            </div>
-        </div>
-    </footer>
+        </footer>
+    </main>
 
     <script>
-        // Progress bar functionality
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const sourceImage = document.getElementById('sourceImage');
-        const targetImage = document.getElementById('targetImage');
-        const generateBtn = document.getElementById('generateBtn');
-
-        function updateProgress(progress, text) {
-            progressBar.style.width = `${progress}%`;
-            progressText.textContent = text;
-        }
-
-        sourceImage.addEventListener('change', function(e) {
-            if (e.target.files[0]) {
-                updateProgress(25, 'Image source chargée');
+        // Active link highlighting
+        const currentPath = window.location.pathname;
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        
+        sidebarLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
             }
-        });
-
-        targetImage.addEventListener('change', function(e) {
-            if (e.target.files[0]) {
-                updateProgress(50, 'Image cible chargée');
-            }
-        });
-
-        generateBtn.addEventListener('click', function() {
-            updateProgress(75, 'Génération en cours...');
-            // Simulate processing
-            setTimeout(() => {
-                updateProgress(100, 'Génération terminée!');
-            }, 2000);
         });
     </script>
 </body>

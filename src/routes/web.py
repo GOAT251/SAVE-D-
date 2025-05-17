@@ -9,6 +9,16 @@ def index():
     """Page d'accueil"""
     return render_template('index.html')
 
+@bp.route('/faceswap')
+def faceswap():
+    """Page du service Face Swap"""
+    return render_template('faceswap.html')
+
+@bp.route('/dashboard')
+def dashboard():
+    """Page du tableau de bord"""
+    return render_template('dashboard.html')
+
 @bp.route('/static/<path:filename>')
 def serve_static(filename):
     """Sert les fichiers statiques"""
