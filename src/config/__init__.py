@@ -2,71 +2,61 @@ import os
 from pathlib import Path
 
 class Config:
-    """Configuration management for MOG AI application."""
+    """Configuration management"""
     
     def __init__(self):
         self.env_file = '.env'
-        self.example_env_file = '.env.example'
         self.required_vars = {
-            'HUGGINGFACE_API_KEY': '',  # Must be set by user
+            'FLASK_APP': 'src',
             'FLASK_ENV': 'development',
             'FLASK_DEBUG': '1',
-            'SECRET_KEY': 'dev-key-temporary',
-            'PORT': '5000'
+            'SECRET_KEY': 'change-this-in-production',
+            'DATABASE_URL': 'sqlite:///instance/app.db'
         }
-        
-        # Create .env file if it doesn't exist
-        self._ensure_env_file()
-        
-        # Load environment variables
-        self._load_env_vars()
-    
-    def _ensure_env_file(self):
-        """Create .env file if it doesn't exist."""
+
+    def load_env(self):
+        """Load environment variables from .env file"""
         if not os.path.exists(self.env_file):
-            try:
-                with open(self.env_file, 'w', encoding='utf-8') as f:
-                    for key, value in self.required_vars.items():
-                        f.write(f'{key}={value}\n')
-                print(f"Created {self.env_file} with default values")
-                print("Please set your HUGGINGFACE_API_KEY in the .env file")
-            except Exception as e:
-                print(f"Warning: Could not create {self.env_file}: {str(e)}")
-                print("Using default environment variables")
-    
-    def _load_env_vars(self):
-        """Load environment variables from .env file."""
+            self.create_env_file()
+            print(f"Created {self.env_file} with default values")
+            return
+
         try:
-            if os.path.exists(self.env_file):
-                with open(self.env_file, 'r', encoding='utf-8') as f:
-                    for line in f:
-                        line = line.strip()
-                        if line and not line.startswith('#'):
-                            key, value = line.split('=', 1)
-                            os.environ[key.strip()] = value.strip()
-            
-            # Ensure all required variables are set
+            with open(self.env_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if '=' in line:
+                        key, value = line.split('=', 1)
+                        os.environ[key.strip()] = value.strip()
+
+            # Set defaults for missing variables
             for key, default_value in self.required_vars.items():
                 if key not in os.environ:
                     os.environ[key] = default_value
-                    
-            # Check if HUGGINGFACE_API_KEY is empty
-            if not os.environ.get('HUGGINGFACE_API_KEY'):
-                print("Warning: HUGGINGFACE_API_KEY is not set. Please set it in your .env file")
+
         except Exception as e:
             print(f"Warning: Error loading environment variables: {str(e)}")
             print("Using default environment variables")
+            self.reset_to_defaults()
+
+    def create_env_file(self):
+        """Create a new .env file with default values"""
+        with open(self.env_file, 'w') as f:
             for key, value in self.required_vars.items():
-                os.environ[key] = value
-    
+                f.write(f'{key}={value}\n')
+
+    def reset_to_defaults(self):
+        """Reset all configuration to default values"""
+        for key, value in self.required_vars.items():
+            os.environ[key] = value
+
     @staticmethod
     def get(key, default=None):
-        """Get an environment variable."""
+        """Get a configuration value"""
         return os.environ.get(key, default)
-    
+
     @staticmethod
     def set(key, value):
-        """Set an environment variable."""
+        """Set a configuration value"""
         os.environ[key] = value
 
 # Create a singleton instance

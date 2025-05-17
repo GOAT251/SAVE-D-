@@ -31,9 +31,6 @@ class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
     FLASK_ENV = 'development'
-    HUGGINGFACE_API_KEY = os.getenv('HUGGINGFACE_API_KEY')
-    if not HUGGINGFACE_API_KEY:
-        print("Warning: HUGGINGFACE_API_KEY not set in environment")
 
 class TestingConfig(Config):
     """Testing configuration."""
@@ -70,15 +67,6 @@ CACHE_DEFAULT_TIMEOUT = 300
 # Configuration du téléchargement de fichiers
 UPLOAD_FOLDER = 'uploads'
 MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB max upload
-
-# Hugging Face API
-HUGGINGFACE_API_KEY = os.getenv('HUGGINGFACE_API_KEY')
-if not HUGGINGFACE_API_KEY:
-    print("Warning: HUGGINGFACE_API_KEY not set in environment")
-
-# Configuration Stripe
-STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
-STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
 
 # Configuration du serveur
 HOST = '0.0.0.0'

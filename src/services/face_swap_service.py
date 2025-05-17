@@ -11,11 +11,10 @@ class FaceSwapService:
         # Using InsightFace's face swapping model
         self.api_url = "https://api-inference.huggingface.co/models/InstituteForTheStudyOfLearning/face-swap"
         self.api_key = os.environ.get('HUGGINGFACE_API_KEY')
-        if not self.api_key:
-            raise ValueError("HUGGINGFACE_API_KEY environment variable is not set")
-        self.headers = {"Authorization": f"Bearer {self.api_key}"}
+        self.is_available = bool(self.api_key)
+        if self.is_available:
+            self.headers = {"Authorization": f"Bearer {self.api_key}"}
 
-    @cache.memoize(timeout=300)
     def swap_faces(self, source_image, target_image):
         """
         Perform face swap using Hugging Face's face-swap model
@@ -25,6 +24,12 @@ class FaceSwapService:
         Returns:
             dict: Result containing success status and either the result image or error message
         """
+        if not self.is_available:
+            return {
+                'success': False,
+                'error': 'Face swap service is not configured. Please set up your API key.'
+            }
+
         try:
             # Validate images
             if not self._validate_image(source_image) or not self._validate_image(target_image):

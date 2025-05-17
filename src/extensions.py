@@ -2,6 +2,7 @@
 Optional extensions that can be enabled as needed
 """
 import os
+from flask import Flask
 
 # Import extensions with try/except to make them optional
 try:
@@ -13,13 +14,7 @@ except ImportError:
 
 try:
     from flask_caching import Cache
-    # Système de cache
-    cache_config = {
-        'CACHE_TYPE': os.getenv('CACHE_TYPE', 'simple'),
-        'CACHE_REDIS_URL': os.getenv('REDIS_URL'),
-        'CACHE_DEFAULT_TIMEOUT': 300
-    }
-    cache = Cache(config=cache_config)
+    cache = Cache()
 except ImportError:
     cache = None
     print("Flask-Caching not available - caching disabled")
@@ -27,12 +22,24 @@ except ImportError:
 try:
     from flask_limiter import Limiter
     from flask_limiter.util import get_remote_address
-    # Rate limiting
     limiter = Limiter(
         key_func=get_remote_address,
-        default_limits=["200 per day", "50 per hour"],
-        storage_uri=os.getenv('REDIS_URL', 'memory://')
+        default_limits=["200 per day", "50 per hour"]
     )
 except ImportError:
     limiter = None
-    print("Flask-Limiter not available - rate limiting disabled") 
+    print("Flask-Limiter not available - rate limiting disabled")
+
+def init_extensions(app: Flask):
+    """Initialize all available extensions"""
+    if db:
+        db.init_app(app)
+    
+    if cache:
+        cache.init_app(app, config={
+            'CACHE_TYPE': 'simple',
+            'CACHE_DEFAULT_TIMEOUT': 300
+        })
+    
+    if limiter:
+        limiter.init_app(app) 
