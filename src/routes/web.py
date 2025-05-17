@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify, current_app, send_from_directory
 from ..services.face_swap_service import FaceSwapService
+import os
 
 bp = Blueprint('web', __name__)
 face_swap_service = FaceSwapService()
@@ -19,10 +20,17 @@ def dashboard():
     """Page du tableau de bord"""
     return render_template('dashboard.html')
 
-@bp.route('/static/<path:filename>')
-def serve_static(filename):
-    """Sert les fichiers statiques"""
-    return send_from_directory('static', filename)
+@bp.route('/static/images/<path:filename>')
+def serve_image(filename):
+    """Sert les images statiques de manière sécurisée"""
+    images_dir = os.path.join(current_app.root_path, '..', 'static', 'images')
+    return send_from_directory(images_dir, filename)
+
+@bp.route('/static/images/assets/<path:filename>')
+def serve_asset(filename):
+    """Sert les assets statiques de manière sécurisée"""
+    assets_dir = os.path.join(current_app.root_path, '..', 'static', 'images', 'assets')
+    return send_from_directory(assets_dir, filename)
 
 @bp.route('/create-payment-intent', methods=['POST'])
 def create_payment():

@@ -4,8 +4,11 @@
   <img src="static/images/logo.svg" alt="MOG AI Logo" width="200"/>
 </p>
 
-## Description
-M.O.G AI est une application Flask moderne et scalable conçue pour l'intelligence artificielle conversationnelle avancée.
+## Description (Mise à jour 17/05/2025)
+M.O.G AI est une application Flask moderne offrant des services d'IA, notamment :
+- Face Swap : Échange de visages entre deux images
+- Dashboard de monitoring en temps réel
+- Interface utilisateur moderne avec design glassmorphism
 
 ## Repositories
 - Main Repository: [MOGGIGN](https://github.com/GOAT251/moggign)
@@ -52,23 +55,44 @@ SECRET_KEY=your-secret-key
 DATABASE_URL=sqlite:///app.db
 ```
 
-## Structure du Projet
+## Structure du Projet (17/05/2025)
 ```
 mog-ai/
-├── src/                # Code source principal
-│   ├── models/        # Modèles de données
-│   ├── routes/        # Routes API et Web
-│   ├── services/      # Logique métier
-│   └── utils/         # Utilitaires
-├── config/            # Configuration
-├── static/           # Fichiers statiques
-│   ├── images/      # Images (logo, etc.)
-│   ├── css/         # Styles
-│   └── js/          # JavaScript
-├── templates/        # Templates HTML
-├── tests/           # Tests unitaires
-└── aide/            # Documentation
+├── src/                    # Code source principal
+│   ├── __init__.py        # Initialisation de l'application
+│   ├── routes/            # Routes et contrôleurs
+│   │   ├── web.py        # Routes interface web
+│   │   └── api.py        # Routes API
+│   ├── services/          # Logique métier
+│   │   └── face_swap_service.py  # Service de face swap
+│   ├── models/           # Modèles de données
+│   └── utils/            # Utilitaires
+├── static/               # Fichiers statiques
+│   ├── images/          # Images et assets
+│   ├── css/            # Styles
+│   └── js/             # JavaScript
+├── templates/           # Templates HTML
+│   ├── index.html      # Page d'accueil
+│   ├── faceswap.html   # Page de face swap
+│   └── dashboard.html   # Dashboard
+├── config/             # Configuration
+├── tests/             # Tests unitaires
+├── instance/          # Données d'instance
+└── uploads/           # Dossier des uploads temporaires
 ```
+
+## Fonctionnalités Implémentées (17/05/2025)
+- ✅ Interface utilisateur avec sidebar responsive
+- ✅ Système de face swap via HuggingFace API
+- ✅ Dashboard avec statistiques en temps réel
+- ✅ Gestion des uploads d'images
+- ✅ Monitoring système
+
+## Technologies
+- Backend: Flask 2.0+
+- Frontend: TailwindCSS, Chart.js
+- Base de données: SQLite (dev) / PostgreSQL (prod)
+- Cache: Redis (optionnel)
 
 ## Développement Backend en cours
 
