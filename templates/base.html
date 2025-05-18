@@ -216,23 +216,23 @@
             <span class="sidebar-text text-xl font-bold gradient-text">M.O.G AI</span>
         </div>
         <div class="flex-1 flex flex-col mt-8">
-            <a href="{{ url_for('web.index') }}" class="sidebar-link {% if request.endpoint == 'web.index' %}active{% endif %}">
+            <a href="/" class="sidebar-link {% if request.path == '/' %}active{% endif %}">
                 <div class="sidebar-icon"><i class="fas fa-home text-xl"></i></div>
                 <span class="sidebar-text">Accueil</span>
             </a>
-            <a href="/web/face-swap/" class="sidebar-link {% if request.endpoint == 'web.face_swap_web.index' %}active{% endif %}">
+            <a href="/face-swap" class="sidebar-link {% if '/face-swap' in request.path %}active{% endif %}">
                 <div class="sidebar-icon"><i class="fas fa-exchange-alt text-xl"></i></div>
                 <span class="sidebar-text">Face Swap</span>
             </a>
-            <a href="/web/looks-analysis/" class="sidebar-link {% if request.endpoint == 'web.looks_analysis.index' %}active{% endif %}">
+            <a href="/web/looks-analysis/" class="sidebar-link {% if '/looks-analysis' in request.path %}active{% endif %}">
                 <div class="sidebar-icon"><i class="fas fa-tshirt text-xl"></i></div>
                 <span class="sidebar-text">Analyse de Look</span>
             </a>
-            <a href="/web/ai-video/" class="sidebar-link {% if request.endpoint == 'web.ai_video.index' %}active{% endif %}">
+            <a href="/web/ai-video/" class="sidebar-link {% if '/ai-video' in request.path %}active{% endif %}">
                 <div class="sidebar-icon"><i class="fas fa-video text-xl"></i></div>
                 <span class="sidebar-text">Vidéo AI</span>
             </a>
-            <a href="{{ url_for('web.dashboard') }}" class="sidebar-link {% if request.endpoint == 'web.dashboard' %}active{% endif %}">
+            <a href="/dashboard" class="sidebar-link {% if '/dashboard' in request.path %}active{% endif %}">
                 <div class="sidebar-icon"><i class="fas fa-chart-line text-xl"></i></div>
                 <span class="sidebar-text">Dashboard</span>
             </a>
@@ -254,8 +254,8 @@
         <!-- Navigation -->
         <nav class="glass-effect sticky top-0 z-40 px-6 py-4">
             <div class="flex justify-between items-center">
-                {% if request.endpoint != 'web.index' %}
-                <a href="{{ url_for('web.index') }}" class="text-2xl font-bold gradient-text hover:opacity-80 transition-opacity">
+                {% if request.path != '/' %}
+                <a href="/" class="text-2xl font-bold gradient-text hover:opacity-80 transition-opacity">
                     {% block nav_title %}M.O.G AI{% endblock %}
                 </a>
                 {% else %}

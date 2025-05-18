@@ -1,0 +1,138 @@
+{% extends "web/base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold text-center text-blue-600 mb-8">{{ title }}</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Section de génération -->
+        <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 shadow-lg">
+            <h2 class="text-2xl font-semibold text-blue-400 mb-4">Décrivez votre vidéo</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-gray-300 mb-2">Description détaillée</label>
+                    <textarea 
+                        id="prompt" 
+                        class="w-full h-32 px-4 py-2 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Décrivez la vidéo que vous souhaitez générer. Exemple: 'Un jeune homme marchant dans la rue au coucher du soleil'"></textarea>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <button 
+                        id="generateBtn"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-200">
+                        Générer la vidéo
+                    </button>
+                    <div id="loading" class="hidden">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section d'information -->
+        <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 shadow-lg">
+            <h2 class="text-2xl font-semibold text-blue-400 mb-4">À propos du service</h2>
+            
+            <div class="space-y-4 text-gray-300">
+                <div class="flex items-start space-x-3">
+                    <svg class="w-6 h-6 text-blue-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-semibold text-blue-400">Modèle utilisé</h3>
+                        <p>Lightricks/LTX-Video - Un modèle de pointe pour la génération de vidéos</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-3">
+                    <svg class="w-6 h-6 text-blue-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-semibold text-blue-400">Temps de génération</h3>
+                        <p>La génération peut prendre entre 30 secondes et 2 minutes selon la complexité</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-3">
+                    <svg class="w-6 h-6 text-blue-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-semibold text-blue-400">Conseils pour de meilleurs résultats</h3>
+                        <ul class="list-disc list-inside ml-4 space-y-2">
+                            <li>Soyez précis dans votre description</li>
+                            <li>Incluez des détails sur l'ambiance et le style</li>
+                            <li>Mentionnez les éléments importants de la scène</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section de résultat -->
+    <div id="result" class="mt-8 hidden">
+        <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 shadow-lg">
+            <h2 class="text-2xl font-semibold text-blue-400 mb-4">Votre vidéo générée</h2>
+            <div class="aspect-w-16 aspect-h-9">
+                <video id="generatedVideo" class="rounded-lg w-full" controls>
+                    Votre navigateur ne supporte pas la lecture de vidéos.
+                </video>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const generateBtn = document.getElementById('generateBtn');
+    const loading = document.getElementById('loading');
+    const result = document.getElementById('result');
+    const generatedVideo = document.getElementById('generatedVideo');
+    const prompt = document.getElementById('prompt');
+
+    generateBtn.addEventListener('click', async function() {
+        if (!prompt.value.trim()) {
+            alert('Veuillez entrer une description pour votre vidéo');
+            return;
+        }
+
+        // Afficher le chargement
+        generateBtn.disabled = true;
+        loading.classList.remove('hidden');
+        result.classList.add('hidden');
+
+        try {
+            const response = await fetch('/web/ai-video/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prompt: prompt.value
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                generatedVideo.src = data.video_url;
+                result.classList.remove('hidden');
+                generatedVideo.load();
+            } else {
+                alert(data.error || 'Une erreur est survenue lors de la génération');
+            }
+        } catch (error) {
+            alert('Une erreur est survenue lors de la génération');
+            console.error('Error:', error);
+        } finally {
+            generateBtn.disabled = false;
+            loading.classList.add('hidden');
+        }
+    });
+});
+</script>
+{% endblock %} 

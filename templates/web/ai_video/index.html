@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - M.O.G AI{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .prompt-container {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .prompt-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(31, 38, 135, 0.4);
+    }
+    
+    .generate-button {
+        background: linear-gradient(60deg, #1e40af, #0ea5e9);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .generate-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .generate-button::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
+    
+    .generate-button:hover::after {
+        left: 100%;
+    }
+    
+    .generate-button:disabled {
+        background: linear-gradient(60deg, #64748b, #94a3b8);
+        cursor: not-allowed;
+    }
+    
+    .result-container {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .result-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(31, 38, 135, 0.4);
+    }
+    
+    .video-container {
+        background: rgba(15, 23, 42, 0.6);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(to right, #1e40af, #0ea5e9);
+        animation: spin 1s linear infinite;
+        position: relative;
+    }
+    
+    .loading-spinner::after {
+        content: '';
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        background: rgba(30, 41, 59, 0.9);
+        border-radius: 50%;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .badge {
+        background: rgba(14, 165, 233, 0.2);
+        border: 1px solid rgba(14, 165, 233, 0.3);
+        color: #38bdf8;
+        border-radius: 9999px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .feature-card {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(31, 38, 135, 0.25);
+    }
+    
+    .feature-icon {
+        background: rgba(14, 165, 233, 0.15);
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold gradient-text mb-4">{{ title }}</h1>
+        <p class="text-xl text-gray-300 max-w-2xl mx-auto">Générez des vidéos époustouflantes grâce à l'intelligence artificielle en décrivant simplement ce que vous imaginez.</p>
+    </div>
+    
+    <div class="max-w-6xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-10 mb-12">
+            <!-- Prompt Input Section -->
+            <div class="glass-effect rounded-xl p-8">
+                <h2 class="text-2xl font-bold gradient-text mb-6">Décrivez votre vidéo</h2>
+                <p class="text-gray-300 mb-6">Utilisez un prompt détaillé pour décrire la scène, les actions, l'ambiance et le style visuel que vous souhaitez obtenir.</p>
+                
+                <form id="videoForm" class="space-y-6">
+                    <div class="prompt-container p-4">
+                        <label for="prompt" class="block text-sm font-medium text-gray-300 mb-2">Votre description</label>
+                        <textarea
+                            id="prompt"
+                            name="prompt"
+                            rows="6"
+                            class="w-full px-4 py-3 bg-slate-800/70 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-200"
+                            placeholder="Ex: Une vue aérienne d'une forêt tropicale luxuriante, avec une cascade scintillante qui coule dans un lagon bleu turquoise. Les oiseaux colorés volent au-dessus de la canopée, style cinématographique, lumière dorée du coucher de soleil..."
+                            required
+                        ></textarea>
+                    </div>
+                    
+                    <div class="flex justify-center">
+                        <button
+                            type="submit"
+                            class="generate-button px-8 py-4 rounded-xl text-white text-lg font-medium flex items-center"
+                            id="generateBtn"
+                        >
+                            <i class="fas fa-magic mr-2"></i>
+                            Générer la vidéo
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Features Section -->
+            <div class="glass-effect rounded-xl p-8">
+                <h2 class="text-2xl font-bold gradient-text mb-6">Caractéristiques</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="feature-card p-4 rounded-xl">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt text-blue-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-200 mb-1">Génération rapide</h3>
+                        <p class="text-gray-400 text-sm">Obtenez vos vidéos en quelques secondes grâce à notre technologie optimisée.</p>
+                    </div>
+                    
+                    <div class="feature-card p-4 rounded-xl">
+                        <div class="feature-icon">
+                            <i class="fas fa-film text-blue-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-200 mb-1">Haute qualité</h3>
+                        <p class="text-gray-400 text-sm">Des vidéos en haute définition pour des résultats professionnels.</p>
+                    </div>
+                    
+                    <div class="feature-card p-4 rounded-xl">
+                        <div class="feature-icon">
+                            <i class="fas fa-palette text-blue-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-200 mb-1">Styles variés</h3>
+                        <p class="text-gray-400 text-sm">Choisissez parmi une multitude de styles visuels pour personnaliser vos créations.</p>
+                    </div>
+                    
+                    <div class="feature-card p-4 rounded-xl">
+                        <div class="feature-icon">
+                            <i class="fas fa-download text-blue-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-200 mb-1">Téléchargement facile</h3>
+                        <p class="text-gray-400 text-sm">Téléchargez vos vidéos instantanément pour les utiliser où vous voulez.</p>
+                    </div>
+                </div>
+                
+                <div class="mt-6 bg-blue-900/20 rounded-lg p-4 border border-blue-900/40">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-blue-400 mt-1"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-300">Conseils pour de meilleurs résultats</h3>
+                            <ul class="mt-2 text-xs text-gray-400 list-disc pl-4 space-y-1">
+                                <li>Soyez précis et détaillé dans votre description</li>
+                                <li>Spécifiez l'ambiance, les couleurs et le mouvement</li>
+                                <li>Mentionnez le style artistique souhaité (cinématographique, animation, etc.)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Section -->
+        <div id="result" class="result-container rounded-xl p-8 mb-12 hidden">
+            <h2 class="text-2xl font-bold gradient-text mb-6">Votre vidéo est prête</h2>
+            
+            <div class="video-container aspect-w-16 aspect-h-9 mb-6">
+                <video id="generatedVideo" controls class="w-full h-full object-contain">
+                    Votre navigateur ne supporte pas la lecture de vidéos.
+                </video>
+            </div>
+            
+            <div class="flex justify-between items-center">
+                <div>
+                    <span class="badge"><i class="fas fa-clock mr-1"></i> Durée: <span id="videoDuration">00:00</span></span>
+                </div>
+                <button id="downloadBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white flex items-center">
+                    <i class="fas fa-download mr-2"></i> Télécharger
+                </button>
+            </div>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="glass-effect rounded-xl p-8 text-center hidden">
+            <div class="flex flex-col items-center justify-center">
+                <div class="loading-spinner mb-6"></div>
+                <h3 class="text-xl font-semibold text-gray-200 mb-2">Génération en cours...</h3>
+                <p class="text-gray-400">Notre IA travaille pour créer votre vidéo. Cela peut prendre quelques instants.</p>
+            </div>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="error" class="bg-red-900/20 border border-red-800 rounded-xl p-6 hidden">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-medium text-red-400">Une erreur est survenue</h3>
+                    <div class="mt-2 text-red-300 text-sm" id="errorMessage"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const videoForm = document.getElementById('videoForm');
+        const generateBtn = document.getElementById('generateBtn');
+        const promptInput = document.getElementById('prompt');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const errorMessage = document.getElementById('errorMessage');
+        const result = document.getElementById('result');
+        const generatedVideo = document.getElementById('generatedVideo');
+        const videoDuration = document.getElementById('videoDuration');
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        videoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validate input
+            if (!promptInput.value.trim()) {
+                return;
+            }
+            
+            // Reset UI
+            error.classList.add('hidden');
+            result.classList.add('hidden');
+            loading.classList.remove('hidden');
+            generateBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/web/ai-video/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: promptInput.value.trim() }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    generatedVideo.src = data.video_url;
+                    
+                    // Set up video metadata when loaded
+                    generatedVideo.onloadedmetadata = function() {
+                        const minutes = Math.floor(generatedVideo.duration / 60);
+                        const seconds = Math.floor(generatedVideo.duration % 60);
+                        videoDuration.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    };
+                    
+                    // Set up download button
+                    downloadBtn.onclick = function() {
+                        const link = document.createElement('a');
+                        link.href = data.video_url;
+                        link.download = 'mogai_generated_video.mp4';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    };
+                    
+                    // Show result
+                    result.classList.remove('hidden');
+                } else {
+                    throw new Error(data.error || 'Une erreur est survenue lors de la génération de la vidéo');
+                }
+            } catch (err) {
+                errorMessage.textContent = err.message;
+                error.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+                generateBtn.disabled = false;
+            }
+        });
+    });
+</script>
+{% endblock %} 

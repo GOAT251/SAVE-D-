@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, url_for, redirect
 import os
 from dotenv import load_dotenv
 
@@ -12,57 +12,62 @@ app = Flask(__name__,
 
 @app.route('/')
 def index():
-    return "Application MOG AI - Version alternative fonctionnelle"
+    return render_template('index.html', title="Accueil")
 
 @app.route('/face-swap')
 def face_swap():
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Face Swap - Version d'urgence</title>
-        <style>
-            body { 
-                font-family: Arial, sans-serif; 
-                background: #0f172a; 
-                color: white; 
-                text-align: center; 
-                padding: 30px; 
-            }
-            h1 { color: #0ea5e9; }
-            form { margin: 20px auto; max-width: 500px; }
-            .button { 
-                background: #0ea5e9; 
-                color: white; 
-                border: none; 
-                padding: 10px 20px; 
-                border-radius: 5px; 
-                cursor: pointer; 
-            }
-        </style>
-    </head>
-    <body>
-        <h1>Face Swap - Version d'Urgence</h1>
-        <p>Cette page est une version minimale d'urgence qui fonctionne.</p>
-        
-        <form action="/face-swap-process" method="post" enctype="multipart/form-data">
-            <div style="margin: 20px 0;">
-                <label for="source">Image source (visage à utiliser):</label><br>
-                <input type="file" name="source_image" id="source" accept="image/*">
-            </div>
-            
-            <div style="margin: 20px 0;">
-                <label for="target">Image cible (où placer le visage):</label><br>
-                <input type="file" name="target_image" id="target" accept="image/*">
-            </div>
-            
-            <div>
-                <button type="submit" class="button">Échanger les visages</button>
-            </div>
-        </form>
-    </body>
-    </html>
-    """
+    return render_template('face_swap/index.html', title="Face Swap")
+
+@app.route('/web/looks-analysis/')
+def looks_analysis():
+    return render_template('looks_analysis/index.html', title="Analyse de Look")
+
+@app.route('/web/ai-video/')
+def ai_video():
+    return render_template('web/ai_video/index.html', title="Génération de Vidéo AI")
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html', title="Dashboard")
+
+@app.route('/face-swap-process', methods=['POST'])
+def face_swap_process():
+    # Stub for processing face swap
+    return jsonify({
+        "success": True,
+        "message": "Fonctionnalité en cours de développement",
+        "image_url": "/static/images/example1.jpg"
+    })
+
+@app.route('/web/ai-video/generate', methods=['POST'])
+def ai_video_generate():
+    # Stub for generating AI video
+    return jsonify({
+        "success": True,
+        "message": "Vidéo générée avec succès",
+        "video_url": "/static/videos/example.mp4"
+    })
+
+@app.context_processor
+def utility_processor():
+    def get_url_for(endpoint, **kwargs):
+        try:
+            return url_for(endpoint, **kwargs)
+        except:
+            # Fallback to direct URLs if endpoint not found
+            if endpoint == 'web.index':
+                return '/'
+            elif endpoint == 'face_swap':
+                return '/face-swap'
+            elif endpoint == 'looks_analysis':
+                return '/web/looks-analysis/'
+            elif endpoint == 'ai_video':
+                return '/web/ai-video/'
+            elif endpoint == 'dashboard':
+                return '/dashboard'
+            else:
+                return '/'
+    return dict(url_for=get_url_for)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001) 
