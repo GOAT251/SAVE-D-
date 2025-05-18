@@ -14,16 +14,23 @@ mog-ai/
 │   │   ├── web/                # Web interface routes
 │   │   │   ├── __init__.py    # Main web routes
 │   │   │   ├── face_swap.py   # Face swap interface routes
-│   │   │   └── dashboard.py   # Dashboard routes
+│   │   │   ├── looks_analysis.py # Look analysis routes
+│   │   │   └── ai_video.py    # AI video generation routes
 │   │   └── api/               # API routes
 │   │       ├── __init__.py    # API initialization
 │   │       └── face_swap.py   # Face swap API endpoints
 │   ├── services/                # Business logic services
-│   │   └── face_swap/         # Face swap service
+│   │   ├── face_swap/         # Face swap service
+│   │   │   ├── __init__.py    # Service initialization
+│   │   │   ├── service.py     # Main service logic
+│   │   │   ├── processor.py   # Image processing
+│   │   │   └── validator.py   # Input validation
+│   │   ├── looks_analysis/    # Look analysis service
+│   │   │   ├── __init__.py    # Service initialization
+│   │   │   └── service.py     # Analysis logic
+│   │   └── ai_video/         # AI video service
 │   │       ├── __init__.py    # Service initialization
-│   │       ├── service.py     # Main service logic
-│   │       ├── processor.py   # Image processing
-│   │       └── validator.py   # Input validation
+│   │       └── service.py     # Video generation logic
 │   ├── models/                  # Data models
 │   │   └── __init__.py        # Models initialization
 │   └── utils/                  # Utility functions
@@ -45,18 +52,30 @@ mog-ai/
 │
 ├── static/                      # Static files
 │   ├── css/                   # Stylesheets
+│   │   ├── main.css         # Main styles
+│   │   └── tailwind.css    # Tailwind output
 │   ├── js/                    # JavaScript files
-│   ├── images/                # Image assets
-│   │   ├── assets/           # UI assets (logos, icons)
-│   │   └── examples/         # Example images
-│   └── uploads/              # User uploads (temporary)
+│   │   ├── face-swap.js     # Face swap functionality
+│   │   ├── looks-analysis.js # Look analysis functionality
+│   │   └── ai-video.js      # Video generation functionality
+│   └── images/                # Image assets
+│       ├── assets/           # UI assets (logos, icons)
+│       └── examples/         # Example images
 │
 ├── templates/                   # HTML templates
-│   ├── base.html             # Base template
+│   ├── base.html             # Base template with common layout
 │   ├── index.html           # Landing page
-│   ├── dashboard.html       # Dashboard template
-│   └── face_swap/          # Face swap templates
-│       └── index.html      # Face swap interface
+│   ├── components/          # Reusable UI components
+│   │   ├── navbar.html     # Navigation bar
+│   │   ├── sidebar.html    # Sidebar menu
+│   │   └── footer.html     # Footer component
+│   ├── face_swap/          # Face swap templates
+│   │   └── index.html      # Face swap interface
+│   ├── looks_analysis/     # Look analysis templates
+│   │   └── index.html      # Analysis interface
+│   └── web/               # Web interface templates
+│       └── ai_video/      # AI video templates
+│           └── index.html # Video generation interface
 │
 ├── scripts/                     # Utility scripts
 │   ├── clean.py             # Cleanup script
@@ -281,3 +300,180 @@ gunicorn -c deployment/gunicorn.conf.py "src:create_app()"
 2. Verify .env file
 3. Check file permissions
 4. Clean temporary files 
+
+## Template Structure Details
+
+### Base Template (base.html)
+- Contains the main layout structure
+- Includes necessary CSS and JavaScript
+- Defines blocks for content injection
+- Implements responsive sidebar navigation
+- Handles user authentication state
+
+```html
+{% block content %}
+<!-- Content goes here -->
+{% endblock %}
+
+{% block scripts %}
+<!-- Page-specific scripts -->
+{% endblock %}
+```
+
+### Page Templates
+Each page template should:
+- Extend base.html
+- Define page-specific title
+- Implement required content blocks
+- Include necessary scripts
+- Follow consistent structure
+
+Example:
+```html
+{% extends "base.html" %}
+
+{% block title %}Page Title{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <!-- Page content -->
+</div>
+{% endblock %}
+```
+
+### Component Structure
+Components should be:
+- Reusable across pages
+- Self-contained
+- Well-documented
+- Easy to maintain
+
+Example component (components/upload.html):
+```html
+<div class="upload-component">
+    <input type="file" class="hidden" id="{{ input_id }}">
+    <label for="{{ input_id }}" class="upload-label">
+        <!-- Upload UI -->
+    </label>
+</div>
+```
+
+## Frontend Best Practices
+
+### 1. CSS Organization
+- Use Tailwind CSS utility classes
+- Keep custom CSS minimal
+- Follow BEM naming convention for custom classes
+- Maintain consistent spacing and layout
+
+### 2. JavaScript Structure
+- Use ES6+ features
+- Implement error handling
+- Add loading states
+- Follow modular pattern
+
+Example:
+```javascript
+// face-swap.js
+const FaceSwap = {
+    init() {
+        // Initialize
+    },
+    handleUpload() {
+        // Handle file upload
+    },
+    processImages() {
+        // Process images
+    }
+};
+```
+
+### 3. Error Handling
+- Display user-friendly error messages
+- Implement proper form validation
+- Show loading states during operations
+- Handle API errors gracefully
+
+### 4. Performance
+- Lazy load images
+- Minimize JavaScript bundles
+- Use proper caching strategies
+- Optimize asset delivery
+
+## Backend Structure Details
+
+### Route Organization
+- Group related routes in blueprints
+- Use consistent URL patterns
+- Implement proper error handling
+- Add request validation
+
+Example:
+```python
+@bp.route('/face-swap', methods=['POST'])
+def face_swap():
+    try:
+        # Process request
+        return jsonify(result)
+    except Exception as e:
+        return handle_error(e)
+```
+
+### Service Layer
+- Separate business logic from routes
+- Implement proper error handling
+- Use dependency injection
+- Follow SOLID principles
+
+Example:
+```python
+class FaceSwapService:
+    def __init__(self, processor):
+        self.processor = processor
+
+    def process_images(self, source, target):
+        # Process images
+        return result
+```
+
+## Common Mistakes to Avoid
+
+### 1. Frontend
+- ❌ Mixing presentation and logic
+- ❌ Inconsistent styling
+- ❌ Poor error handling
+- ❌ Unresponsive design
+
+### 2. Backend
+- ❌ Mixing concerns in routes
+- ❌ Poor error handling
+- ❌ Lack of input validation
+- ❌ Missing documentation
+
+### 3. Security
+- ❌ Exposing sensitive information
+- ❌ Missing input sanitization
+- ❌ Weak authentication
+- ❌ Insecure file handling
+
+## Best Practices Checklist
+
+### Frontend
+✅ Use semantic HTML
+✅ Follow responsive design principles
+✅ Implement proper error handling
+✅ Add loading states
+✅ Validate user input
+✅ Use consistent styling
+✅ Optimize performance
+✅ Add proper documentation
+
+### Backend
+✅ Separate concerns
+✅ Implement proper validation
+✅ Handle errors gracefully
+✅ Use proper status codes
+✅ Add logging
+✅ Secure endpoints
+✅ Document API endpoints
+✅ Follow RESTful principles 

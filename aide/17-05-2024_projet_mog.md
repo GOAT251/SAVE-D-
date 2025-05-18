@@ -2,7 +2,7 @@
 Date de début : 17 Mai 2024
 
 ## 1. Vue d'ensemble du projet
-M.O.G AI (Mastering Optical Grafting) est une plateforme web permettant de réaliser des face swaps grâce à l'intelligence artificielle. Le projet utilise Flask pour le backend et une interface moderne avec Tailwind CSS.
+M.O.G AI (Mastering Optical Grafting) est une plateforme web permettant de réaliser des face swaps et des manipulations vidéo grâce à l'intelligence artificielle. Le projet utilise Flask pour le backend et une interface moderne avec Tailwind CSS.
 
 ## 2. Étapes de développement réalisées
 
@@ -111,3 +111,208 @@ mog-ai/
    - Tableau de bord administrateur
    - Métriques d'utilisation
    - Rapports de performance
+
+## 6. Structure des Templates
+
+### Base Template (base.html)
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %} - MOG AI</title>
+    <!-- CSS et meta tags -->
+</head>
+<body class="bg-gray-100">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <!-- Navigation -->
+    </nav>
+    
+    <!-- Contenu principal -->
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
+```
+
+### Pages Principales
+
+#### 1. Page d'Accueil (index.html)
+- Design moderne avec glassmorphism
+- Présentation des fonctionnalités
+- Appels à l'action clairs
+- Navigation intuitive
+
+#### 2. Face Swap (face_swap/index.html)
+- Interface de téléchargement d'images
+- Prévisualisation en temps réel
+- Options de configuration
+- Affichage des résultats
+
+#### 3. Analyse de Look (looks_analysis/index.html)
+- Upload de photos
+- Analyse détaillée
+- Recommandations personnalisées
+- Historique des analyses
+
+#### 4. Génération Vidéo AI (web/ai_video/index.html)
+- Interface de création vidéo
+- Options de personnalisation
+- Prévisualisation en direct
+- Gestion des exports
+
+## 7. Composants Réutilisables
+
+### Navigation
+```html
+<!-- components/navbar.html -->
+<nav class="bg-white shadow-lg">
+    <div class="container mx-auto">
+        <!-- Logo et menu -->
+    </div>
+</nav>
+```
+
+### Sidebar
+```html
+<!-- components/sidebar.html -->
+<aside class="w-64 bg-white">
+    <div class="sidebar-content">
+        <!-- Menu latéral -->
+    </div>
+</aside>
+```
+
+### Upload Component
+```html
+<!-- components/upload.html -->
+<div class="upload-zone">
+    <input type="file" class="hidden">
+    <div class="upload-ui">
+        <!-- Interface d'upload -->
+    </div>
+</div>
+```
+
+## 8. Styles et Thèmes
+
+### Couleurs Principales
+```css
+:root {
+    --primary: #4F46E5;
+    --secondary: #10B981;
+    --accent: #F59E0B;
+    --background: #F3F4F6;
+}
+```
+
+### Classes Utilitaires
+```css
+.glassmorphism {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+}
+
+.gradient-text {
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    color: transparent;
+}
+```
+
+## 9. JavaScript Modules
+
+### Face Swap Module
+```javascript
+// static/js/face-swap.js
+const FaceSwap = {
+    init() {
+        this.setupListeners();
+        this.initDropzone();
+    },
+    
+    handleUpload(files) {
+        // Logique d'upload
+    },
+    
+    processImages() {
+        // Traitement des images
+    }
+};
+```
+
+### Video Generation Module
+```javascript
+// static/js/ai-video.js
+const VideoGenerator = {
+    init() {
+        this.setupControls();
+        this.initPreview();
+    },
+    
+    generateVideo() {
+        // Génération de vidéo
+    }
+};
+```
+
+## 10. Bonnes Pratiques
+
+### Frontend
+1. **Structure HTML**
+   - Utiliser des balises sémantiques
+   - Maintenir une hiérarchie claire
+   - Optimiser pour l'accessibilité
+
+2. **CSS**
+   - Suivre une convention de nommage
+   - Utiliser les variables CSS
+   - Optimiser les performances
+
+3. **JavaScript**
+   - Modulariser le code
+   - Gérer les erreurs
+   - Optimiser les performances
+
+### Backend
+1. **Routes**
+   - Organisation claire
+   - Validation des entrées
+   - Gestion des erreurs
+
+2. **Services**
+   - Séparation des responsabilités
+   - Tests unitaires
+   - Documentation claire
+
+## 11. Erreurs à Éviter
+
+### Frontend
+❌ Ne pas mélanger la logique et la présentation
+❌ Éviter le code CSS en ligne
+❌ Ne pas négliger la gestion des erreurs
+❌ Éviter le code JavaScript non modulaire
+
+### Backend
+❌ Ne pas exposer les erreurs serveur
+❌ Éviter les routes sans validation
+❌ Ne pas négliger la sécurité
+❌ Éviter le code non documenté
+
+## 12. Checklist de Développement
+
+### Nouvelle Fonctionnalité
+✅ Créer les templates nécessaires
+✅ Implémenter les styles
+✅ Ajouter la logique JavaScript
+✅ Créer les routes backend
+✅ Tester l'ensemble
+✅ Documenter le code
+
+### Maintenance
+✅ Vérifier les performances
+✅ Optimiser le code
+✅ Mettre à jour la documentation
+✅ Corriger les bugs
+✅ Améliorer l'UX
