@@ -1,0 +1,558 @@
+{% extends "base.html" %}
+
+{% block title %}Face Swap - M.O.G AI{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .upload-area {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(15px);
+        border: 2px dashed rgba(255, 255, 255, 0.15);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .upload-area:hover {
+        transform: translateY(-5px);
+        border-color: var(--gradient-end);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .upload-area.has-image {
+        border: none;
+    }
+    
+    .upload-area::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, transparent, rgba(14, 165, 233, 0.1), transparent);
+        transform: translateX(-100%);
+        transition: 0.5s;
+    }
+    
+    .upload-area:hover::before {
+        transform: translateX(100%);
+    }
+    
+    .upload-icon {
+        transition: all 0.3s ease;
+        background: rgba(14, 165, 233, 0.1);
+        height: 80px;
+        width: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .upload-area:hover .upload-icon {
+        transform: scale(1.1);
+        background: rgba(14, 165, 233, 0.2);
+    }
+    
+    .file-input {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    
+    .preview-container {
+        position: relative;
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+    
+    .preview-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .preview-container:hover .preview-overlay {
+        opacity: 1;
+    }
+    
+    .progress-ring {
+        transform: rotate(-90deg);
+        transform-origin: center;
+    }
+    
+    .progress-ring-circle {
+        stroke: url(#gradient);
+        stroke-dasharray: 283;
+        stroke-dashoffset: 283;
+        transition: stroke-dashoffset 0.5s ease;
+    }
+    
+    .swap-button {
+        background: linear-gradient(60deg, #4f46e5, #0ea5e9);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .swap-button::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
+    
+    .swap-button:hover::after {
+        left: 100%;
+    }
+    
+    .swap-button:disabled {
+        background: linear-gradient(60deg, #64748b, #94a3b8);
+        cursor: not-allowed;
+    }
+    
+    .result-container {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .result-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(31, 38, 135, 0.4);
+    }
+    
+    .action-button {
+        transition: all 0.3s ease;
+    }
+    
+    .action-button:hover {
+        transform: translateY(-2px);
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .animate-pulse {
+        animation: pulse 1.5s infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold gradient-text mb-4">Face Swap</h1>
+        <p class="text-xl text-gray-300 max-w-2xl mx-auto">Échangez les visages entre deux images avec notre technologie AI avancée.</p>
+    </div>
+    
+    <div class="max-w-6xl mx-auto">
+        <!-- Upload Section with Modern Design -->
+        <div class="grid md:grid-cols-2 gap-10 mb-12">
+            <!-- Source Image Upload -->
+            <div class="glass-effect rounded-xl p-8">
+                <h2 class="text-2xl font-bold gradient-text mb-6">Image Source</h2>
+                <p class="text-gray-300 mb-6">Cette image fournira le visage que vous souhaitez placer sur l'image cible.</p>
+                
+                <div id="sourceUploadArea" class="upload-area p-8 flex flex-col items-center justify-center h-64">
+                    <div class="upload-icon rounded-full mb-4">
+                        <i class="fas fa-user text-4xl text-blue-400"></i>
+                    </div>
+                    <p class="text-center text-gray-300 mb-2">Glissez et déposez votre image ici</p>
+                    <p class="text-center text-gray-400 text-sm">ou cliquez pour parcourir</p>
+                    <input type="file" class="file-input" id="sourceInput" accept="image/*">
+                    
+                    <div id="sourcePreviewContainer" class="preview-container w-full h-full hidden">
+                        <img id="sourcePreview" class="w-full h-full object-cover" src="" alt="Aperçu image source">
+                        <div class="preview-overlay">
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg" id="sourceRemoveBtn">
+                                <i class="fas fa-trash-alt mr-2"></i>Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Target Image Upload -->
+            <div class="glass-effect rounded-xl p-8">
+                <h2 class="text-2xl font-bold gradient-text mb-6">Image Cible</h2>
+                <p class="text-gray-300 mb-6">Cette image recevra le visage de l'image source.</p>
+                
+                <div id="targetUploadArea" class="upload-area p-8 flex flex-col items-center justify-center h-64">
+                    <div class="upload-icon rounded-full mb-4">
+                        <i class="fas fa-image text-4xl text-indigo-400"></i>
+                    </div>
+                    <p class="text-center text-gray-300 mb-2">Glissez et déposez votre image ici</p>
+                    <p class="text-center text-gray-400 text-sm">ou cliquez pour parcourir</p>
+                    <input type="file" class="file-input" id="targetInput" accept="image/*">
+                    
+                    <div id="targetPreviewContainer" class="preview-container w-full h-full hidden">
+                        <img id="targetPreview" class="w-full h-full object-cover" src="" alt="Aperçu image cible">
+                        <div class="preview-overlay">
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg" id="targetRemoveBtn">
+                                <i class="fas fa-trash-alt mr-2"></i>Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Process Button -->
+        <div class="text-center mb-16">
+            <button id="swapButton" class="swap-button px-8 py-4 rounded-xl text-lg font-bold text-white shadow-lg disabled:opacity-50" disabled>
+                <i class="fas fa-exchange-alt mr-3"></i>Échanger les visages
+            </button>
+            <p class="text-gray-400 mt-3 text-sm" id="uploadPrompt">Veuillez télécharger les deux images pour continuer</p>
+        </div>
+        
+        <!-- Progress Indicator -->
+        <div id="progressContainer" class="max-w-md mx-auto mb-16 hidden">
+            <div class="flex flex-col items-center">
+                <svg class="progress-ring w-32 h-32" viewBox="0 0 100 100">
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#4f46e5" />
+                            <stop offset="100%" stop-color="#0ea5e9" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="progress-ring-circle" cx="50" cy="50" r="45" fill="transparent" stroke-width="8"></circle>
+                </svg>
+                <p class="text-xl font-bold text-center mt-4" id="progressText">Traitement en cours...</p>
+                <p class="text-gray-400 text-center mt-2" id="progressPercentage">0%</p>
+            </div>
+        </div>
+        
+        <!-- Result Container -->
+        <div id="resultContainer" class="result-container rounded-xl overflow-hidden mb-16 hidden">
+            <div class="p-6 border-b border-gray-700">
+                <h2 class="text-2xl font-bold gradient-text">Résultat</h2>
+                <p class="text-gray-300 mt-2">Voici le résultat de votre face swap.</p>
+            </div>
+            
+            <div class="p-6">
+                <div class="relative">
+                    <img id="resultImage" src="" alt="Résultat" class="w-full rounded-lg">
+                    
+                    <div class="absolute top-4 right-4 flex space-x-3">
+                        <button id="downloadBtn" class="action-button bg-gradient-to-r from-indigo-600 to-blue-500 text-white p-3 rounded-full shadow-lg">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button id="shareBtn" class="action-button glass-effect text-white p-3 rounded-full shadow-lg">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <div class="bg-gray-700 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                            <i class="fas fa-magic text-indigo-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-300 font-medium">Qualité</p>
+                            <div class="flex mt-1">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star-half-alt text-yellow-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="tryAgainBtn" class="action-button glass-effect px-4 py-2 rounded-lg text-gray-300 hover:text-white">
+                        <i class="fas fa-redo mr-2"></i>Réessayer
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="errorContainer" class="glass-effect rounded-xl p-6 text-center mb-16 hidden">
+            <div class="flex flex-col items-center">
+                <div class="text-red-500 text-5xl mb-4">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-red-400 mb-4">Une erreur est survenue</h2>
+                <p id="errorMessage" class="text-gray-300 mb-6">Impossible de traiter votre demande.</p>
+                <button id="errorTryAgainBtn" class="swap-button px-6 py-3 rounded-lg text-white">
+                    <i class="fas fa-redo mr-2"></i>Réessayer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// File upload handling for source image
+document.getElementById('sourceInput').addEventListener('change', function(e) {
+    handleFileUpload(e, 'source');
+});
+
+// File upload handling for target image
+document.getElementById('targetInput').addEventListener('change', function(e) {
+    handleFileUpload(e, 'target');
+});
+
+// Remove buttons
+document.getElementById('sourceRemoveBtn').addEventListener('click', function() {
+    removeImage('source');
+});
+
+document.getElementById('targetRemoveBtn').addEventListener('click', function() {
+    removeImage('target');
+});
+
+// Face swap button
+document.getElementById('swapButton').addEventListener('click', function() {
+    processFaceSwap();
+});
+
+// Try again buttons
+document.getElementById('tryAgainBtn').addEventListener('click', function() {
+    resetInterface();
+});
+
+document.getElementById('errorTryAgainBtn').addEventListener('click', function() {
+    resetInterface();
+});
+
+// Download result
+document.getElementById('downloadBtn').addEventListener('click', function() {
+    downloadResult();
+});
+
+// Share result
+document.getElementById('shareBtn').addEventListener('click', function() {
+    shareResult();
+});
+
+// Drag and drop handling
+setupDragAndDrop('sourceUploadArea', 'sourceInput');
+setupDragAndDrop('targetUploadArea', 'targetInput');
+
+// Handle file uploads
+function handleFileUpload(event, type) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    const previewContainer = document.getElementById(type + 'PreviewContainer');
+    const previewImage = document.getElementById(type + 'Preview');
+    const uploadArea = document.getElementById(type + 'UploadArea');
+    
+    reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        previewContainer.classList.remove('hidden');
+        uploadArea.classList.add('has-image');
+    };
+    
+    reader.readAsDataURL(file);
+    checkSwapButtonState();
+}
+
+// Remove uploaded image
+function removeImage(type) {
+    const input = document.getElementById(type + 'Input');
+    const previewContainer = document.getElementById(type + 'PreviewContainer');
+    const uploadArea = document.getElementById(type + 'UploadArea');
+    
+    input.value = '';
+    previewContainer.classList.add('hidden');
+    uploadArea.classList.remove('has-image');
+    
+    checkSwapButtonState();
+}
+
+// Check if both images are uploaded to enable swap button
+function checkSwapButtonState() {
+    const sourceInput = document.getElementById('sourceInput');
+    const targetInput = document.getElementById('targetInput');
+    const swapButton = document.getElementById('swapButton');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+    
+    if (sourceInput.files.length > 0 && targetInput.files.length > 0) {
+        swapButton.disabled = false;
+        swapButton.classList.add('animate-pulse');
+        uploadPrompt.textContent = "Cliquez sur le bouton pour échanger les visages";
+    } else {
+        swapButton.disabled = true;
+        swapButton.classList.remove('animate-pulse');
+        uploadPrompt.textContent = "Veuillez télécharger les deux images pour continuer";
+    }
+}
+
+// Process face swap
+function processFaceSwap() {
+    // Hide the button and show progress
+    document.getElementById('swapButton').classList.add('hidden');
+    document.getElementById('uploadPrompt').classList.add('hidden');
+    document.getElementById('progressContainer').classList.remove('hidden');
+    
+    // Simulate progress
+    let progress = 0;
+    const progressCircle = document.querySelector('.progress-ring-circle');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const progressText = document.getElementById('progressText');
+    const circumference = 2 * Math.PI * 45;
+    
+    const interval = setInterval(function() {
+        progress += 1;
+        const dashoffset = circumference - (progress / 100) * circumference;
+        progressCircle.style.strokeDashoffset = dashoffset;
+        progressPercentage.textContent = progress + '%';
+        
+        if (progress === 30) {
+            progressText.textContent = "Détection des visages...";
+        } else if (progress === 60) {
+            progressText.textContent = "Application de l'IA...";
+        } else if (progress === 90) {
+            progressText.textContent = "Finalisation...";
+        }
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            showResult();
+        }
+    }, 50);
+    
+    // Collect form data and submit (in a real application)
+    const formData = new FormData();
+    formData.append('source_image', document.getElementById('sourceInput').files[0]);
+    formData.append('target_image', document.getElementById('targetInput').files[0]);
+    
+    // In a real app, you would send this to your backend
+    // fetch('/api/v1/face-swap', {
+    //     method: 'POST',
+    //     body: formData
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //     showResult(data.result_url);
+    // })
+    // .catch(error => {
+    //     showError(error.message);
+    // });
+}
+
+// Show result
+function showResult(resultUrl) {
+    // Hide progress
+    document.getElementById('progressContainer').classList.add('hidden');
+    
+    // Get target image for demo (in real app, use resultUrl from server)
+    const targetImage = document.getElementById('targetPreview').src;
+    document.getElementById('resultImage').src = targetImage;
+    
+    // Show result container
+    document.getElementById('resultContainer').classList.remove('hidden');
+}
+
+// Show error
+function showError(message) {
+    document.getElementById('progressContainer').classList.add('hidden');
+    document.getElementById('errorMessage').textContent = message || "Impossible de traiter votre demande.";
+    document.getElementById('errorContainer').classList.remove('hidden');
+}
+
+// Reset interface to try again
+function resetInterface() {
+    document.getElementById('resultContainer').classList.add('hidden');
+    document.getElementById('errorContainer').classList.add('hidden');
+    document.getElementById('swapButton').classList.remove('hidden');
+    document.getElementById('uploadPrompt').classList.remove('hidden');
+}
+
+// Download result
+function downloadResult() {
+    const resultImage = document.getElementById('resultImage').src;
+    const link = document.createElement('a');
+    link.href = resultImage;
+    link.download = 'face-swap-result.jpg';
+    link.click();
+}
+
+// Share result
+function shareResult() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Mon Face Swap avec M.O.G AI',
+            text: 'Regarde ce face swap que j\'ai créé avec M.O.G AI!',
+            url: window.location.href
+        })
+        .catch(() => {
+            alert('Partage impossible. Vous pouvez télécharger l\'image et la partager manuellement.');
+        });
+    } else {
+        alert('Fonctionnalité de partage non disponible sur votre navigateur. Vous pouvez télécharger l\'image et la partager manuellement.');
+    }
+}
+
+// Setup drag and drop
+function setupDragAndDrop(areaId, inputId) {
+    const dropArea = document.getElementById(areaId);
+    const input = document.getElementById(inputId);
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+        dropArea.classList.add('border-indigo-500');
+    }
+    
+    function unhighlight() {
+        dropArea.classList.remove('border-indigo-500');
+    }
+    
+    dropArea.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length) {
+            input.files = files;
+            const event = new Event('change');
+            input.dispatchEvent(event);
+        }
+    }
+}
+</script>
+{% endblock %} 

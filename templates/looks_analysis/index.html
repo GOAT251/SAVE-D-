@@ -1,0 +1,571 @@
+{% extends "base.html" %}
+
+{% block title %}Analyse de Look - M.O.G AI{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .upload-area {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(15px);
+        border: 2px dashed rgba(255, 255, 255, 0.15);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        height: 320px;
+    }
+    
+    .upload-area:hover {
+        transform: translateY(-5px);
+        border-color: var(--gradient-end);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .upload-area.has-image {
+        border: none;
+    }
+    
+    .upload-area::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, transparent, rgba(167, 139, 250, 0.1), transparent);
+        transform: translateX(-100%);
+        transition: 0.5s;
+    }
+    
+    .upload-area:hover::before {
+        transform: translateX(100%);
+    }
+    
+    .upload-icon {
+        transition: all 0.3s ease;
+        background: rgba(167, 139, 250, 0.1);
+        height: 80px;
+        width: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .upload-area:hover .upload-icon {
+        transform: scale(1.1);
+        background: rgba(167, 139, 250, 0.2);
+    }
+    
+    .file-input {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    
+    .preview-container {
+        position: relative;
+        border-radius: 1rem;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .preview-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .preview-container:hover .preview-overlay {
+        opacity: 1;
+    }
+    
+    .analyze-button {
+        background: linear-gradient(60deg, #8b5cf6, #d946ef);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .analyze-button::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
+    
+    .analyze-button:hover::after {
+        left: 100%;
+    }
+    
+    .analyze-button:disabled {
+        background: linear-gradient(60deg, #64748b, #94a3b8);
+        cursor: not-allowed;
+    }
+    
+    .progress-ring {
+        transform: rotate(-90deg);
+        transform-origin: center;
+    }
+    
+    .progress-ring-circle {
+        stroke: url(#gradient);
+        stroke-dasharray: 283;
+        stroke-dashoffset: 283;
+        transition: stroke-dashoffset 0.5s ease;
+    }
+    
+    .result-container {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .result-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(31, 38, 135, 0.4);
+    }
+    
+    .style-tag {
+        background: rgba(139, 92, 246, 0.15);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 9999px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+        color: rgba(139, 92, 246, 1);
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+    }
+    
+    .suggestion-card {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .suggestion-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(31, 38, 135, 0.25);
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .animate-pulse {
+        animation: pulse 1.5s infinite;
+    }
+    
+    .color-circle {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold gradient-text mb-4">Analyse de Look</h1>
+        <p class="text-xl text-gray-300 max-w-2xl mx-auto">Notre IA analyse votre style et vous propose des recommandations personnalisées pour sublimer votre look.</p>
+    </div>
+    
+    <div class="max-w-6xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-10 mb-12">
+            <!-- Upload Section -->
+            <div class="glass-effect rounded-xl p-8">
+                <h2 class="text-2xl font-bold gradient-text mb-6">Téléchargez votre photo</h2>
+                <p class="text-gray-300 mb-6">Notre IA analysera votre style vestimentaire et vos couleurs pour vous proposer des suggestions adaptées.</p>
+                
+                <div id="uploadArea" class="upload-area flex flex-col items-center justify-center">
+                    <div class="upload-icon rounded-full mb-4">
+                        <i class="fas fa-tshirt text-4xl text-purple-400"></i>
+                    </div>
+                    <p class="text-center text-gray-300 mb-2">Glissez et déposez votre photo ici</p>
+                    <p class="text-center text-gray-400 text-sm mb-3">ou cliquez pour parcourir</p>
+                    <p class="text-center text-gray-500 text-xs">PNG, JPG jusqu'à 5MB</p>
+                    <input type="file" class="file-input" id="imageInput" accept="image/*">
+                    
+                    <div id="previewContainer" class="preview-container hidden">
+                        <img id="imagePreview" class="w-full h-full object-cover" src="" alt="Aperçu de votre photo">
+                        <div class="preview-overlay">
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg" id="removeImageBtn">
+                                <i class="fas fa-trash-alt mr-2"></i>Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features Section -->
+            <div class="glass-effect rounded-xl p-8">
+                <h2 class="text-2xl font-bold gradient-text mb-6">Ce que vous obtiendrez</h2>
+                
+                <div class="space-y-6">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 p-2 bg-purple-500/20 rounded-lg mr-4">
+                            <i class="fas fa-palette text-purple-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-200 mb-1">Analyse de palette de couleurs</h3>
+                            <p class="text-gray-400">Découvrez quelles couleurs vous mettent en valeur et comment les associer.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 p-2 bg-purple-500/20 rounded-lg mr-4">
+                            <i class="fas fa-ruler-combined text-purple-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-200 mb-1">Analyse des coupes et styles</h3>
+                            <p class="text-gray-400">Identifiez les silhouettes qui conviennent le mieux à votre morphologie.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 p-2 bg-purple-500/20 rounded-lg mr-4">
+                            <i class="fas fa-shopping-bag text-purple-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-200 mb-1">Suggestions de pièces</h3>
+                            <p class="text-gray-400">Recevez des recommandations d'articles qui complèteront parfaitement votre garde-robe.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 p-2 bg-purple-500/20 rounded-lg mr-4">
+                            <i class="fas fa-star text-purple-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-200 mb-1">Conseils personnalisés</h3>
+                            <p class="text-gray-400">Obtenez des conseils sur mesure pour améliorer votre style au quotidien.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Process Button -->
+        <div class="text-center mb-16">
+            <button id="analyzeButton" class="analyze-button px-8 py-4 rounded-xl text-lg font-bold text-white shadow-lg disabled:opacity-50" disabled>
+                <i class="fas fa-magic mr-3"></i>Analyser mon style
+            </button>
+            <p class="text-gray-400 mt-3 text-sm" id="uploadPrompt">Veuillez télécharger une photo pour continuer</p>
+        </div>
+        
+        <!-- Progress Indicator -->
+        <div id="progressContainer" class="max-w-md mx-auto mb-16 hidden">
+            <div class="flex flex-col items-center">
+                <svg class="progress-ring w-32 h-32" viewBox="0 0 100 100">
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#8b5cf6" />
+                            <stop offset="100%" stop-color="#d946ef" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="progress-ring-circle" cx="50" cy="50" r="45" fill="transparent" stroke-width="8"></circle>
+                </svg>
+                <p class="text-xl font-bold text-center mt-4" id="progressText">Analyse en cours...</p>
+                <p class="text-gray-400 text-center mt-2" id="progressPercentage">0%</p>
+            </div>
+        </div>
+        
+        <!-- Results Container -->
+        <div id="resultContainer" class="result-container rounded-xl overflow-hidden mb-16 hidden">
+            <div class="p-6 border-b border-gray-700">
+                <h2 class="text-2xl font-bold gradient-text">Résultats de l'analyse</h2>
+                <p class="text-gray-300 mt-2">Voici l'analyse de votre style et nos recommandations personnalisées.</p>
+            </div>
+            
+            <div class="p-6">
+                <!-- Style Analysis -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-200">Votre style</h3>
+                    <div class="flex flex-wrap mb-4" id="styleTags">
+                        <span class="style-tag">Urbain</span>
+                        <span class="style-tag">Contemporain</span>
+                        <span class="style-tag">Décontracté chic</span>
+                    </div>
+                    <p class="text-gray-300" id="styleDescription">
+                        Votre style est caractérisé par des lignes épurées et une approche contemporaine de la mode. Vous privilégiez le confort sans sacrifier l'élégance.
+                    </p>
+                </div>
+                
+                <!-- Color Palette -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-200">Votre palette de couleurs</h3>
+                    <div class="flex items-center space-x-2 mb-4" id="colorPalette">
+                        <span class="color-circle" style="background-color: #3B82F6;"></span>
+                        <span class="color-circle" style="background-color: #10B981;"></span>
+                        <span class="color-circle" style="background-color: #6366F1;"></span>
+                        <span class="color-circle" style="background-color: #F59E0B;"></span>
+                        <span class="color-circle" style="background-color: #EF4444;"></span>
+                    </div>
+                    <p class="text-gray-300" id="colorDescription">
+                        Les tons froids comme le bleu et le violet vous mettent particulièrement en valeur. Vous pouvez ajouter des touches d'ocre ou de rouge vif pour plus de dynamisme.
+                    </p>
+                </div>
+                
+                <!-- Recommendations -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-200">Recommandations</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="recommendationsContainer">
+                        <div class="suggestion-card rounded-lg p-4">
+                            <h4 class="font-medium text-purple-300 mb-2">Pièces à privilégier</h4>
+                            <ul class="text-gray-300 space-y-2">
+                                <li class="flex items-center"><i class="fas fa-check text-green-400 mr-2"></i> Vestes structurées</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-400 mr-2"></i> Jeans coupe droite</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-400 mr-2"></i> T-shirts col V</li>
+                            </ul>
+                        </div>
+                        <div class="suggestion-card rounded-lg p-4">
+                            <h4 class="font-medium text-purple-300 mb-2">Accessoires recommandés</h4>
+                            <ul class="text-gray-300 space-y-2">
+                                <li class="flex items-center"><i class="fas fa-check text-green-400 mr-2"></i> Montres minimalistes</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-400 mr-2"></i> Ceintures en cuir fin</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-400 mr-2"></i> Lunettes cadre métallique</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="flex justify-between items-center">
+                    <button id="downloadReportBtn" class="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+                        <i class="fas fa-download mr-2"></i>Télécharger le rapport
+                    </button>
+                    <button id="tryAgainBtn" class="glass-effect px-4 py-2 rounded-lg text-gray-300 hover:text-white">
+                        <i class="fas fa-redo mr-2"></i>Nouvelle analyse
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// File upload handling
+document.getElementById('imageInput').addEventListener('change', function(e) {
+    handleFileUpload(e);
+});
+
+// Remove button
+document.getElementById('removeImageBtn').addEventListener('click', function() {
+    removeImage();
+});
+
+// Analyze button
+document.getElementById('analyzeButton').addEventListener('click', function() {
+    processAnalysis();
+});
+
+// Try again button
+document.getElementById('tryAgainBtn').addEventListener('click', function() {
+    resetInterface();
+});
+
+// Download report
+document.getElementById('downloadReportBtn').addEventListener('click', function() {
+    downloadReport();
+});
+
+// Setup drag and drop
+setupDragAndDrop('uploadArea', 'imageInput');
+
+// Handle file upload
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    const previewContainer = document.getElementById('previewContainer');
+    const previewImage = document.getElementById('imagePreview');
+    const uploadArea = document.getElementById('uploadArea');
+    
+    reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        previewContainer.classList.remove('hidden');
+        uploadArea.classList.add('has-image');
+    };
+    
+    reader.readAsDataURL(file);
+    checkAnalyzeButtonState();
+}
+
+// Remove uploaded image
+function removeImage() {
+    const input = document.getElementById('imageInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const uploadArea = document.getElementById('uploadArea');
+    
+    input.value = '';
+    previewContainer.classList.add('hidden');
+    uploadArea.classList.remove('has-image');
+    
+    checkAnalyzeButtonState();
+}
+
+// Check if image is uploaded to enable analyze button
+function checkAnalyzeButtonState() {
+    const imageInput = document.getElementById('imageInput');
+    const analyzeButton = document.getElementById('analyzeButton');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+    
+    if (imageInput.files.length > 0) {
+        analyzeButton.disabled = false;
+        analyzeButton.classList.add('animate-pulse');
+        uploadPrompt.textContent = "Cliquez sur le bouton pour analyser votre style";
+    } else {
+        analyzeButton.disabled = true;
+        analyzeButton.classList.remove('animate-pulse');
+        uploadPrompt.textContent = "Veuillez télécharger une photo pour continuer";
+    }
+}
+
+// Process analysis
+function processAnalysis() {
+    // Hide the button and show progress
+    document.getElementById('analyzeButton').classList.add('hidden');
+    document.getElementById('uploadPrompt').classList.add('hidden');
+    document.getElementById('progressContainer').classList.remove('hidden');
+    
+    // Simulate progress
+    let progress = 0;
+    const progressCircle = document.querySelector('.progress-ring-circle');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const progressText = document.getElementById('progressText');
+    const circumference = 2 * Math.PI * 45;
+    
+    const interval = setInterval(function() {
+        progress += 1;
+        const dashoffset = circumference - (progress / 100) * circumference;
+        progressCircle.style.strokeDashoffset = dashoffset;
+        progressPercentage.textContent = progress + '%';
+        
+        if (progress === 30) {
+            progressText.textContent = "Analyse du style...";
+        } else if (progress === 60) {
+            progressText.textContent = "Génération des recommandations...";
+        } else if (progress === 90) {
+            progressText.textContent = "Finalisation...";
+        }
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            showResult();
+        }
+    }, 50);
+    
+    // In a real app, send the image to the backend
+    // const formData = new FormData();
+    // formData.append('image', document.getElementById('imageInput').files[0]);
+    // 
+    // fetch('/web/looks-analysis/analyze', {
+    //     method: 'POST',
+    //     body: formData
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //     showResult(data);
+    // })
+    // .catch(error => {
+    //     console.error('Error:', error);
+    //     alert('Une erreur est survenue lors de l\'analyse');
+    // });
+}
+
+// Show result
+function showResult(data) {
+    // Hide progress
+    document.getElementById('progressContainer').classList.add('hidden');
+    
+    // In a real app, use the data from the backend to populate the results
+    // For now, we use the default values
+    
+    // Show result container
+    document.getElementById('resultContainer').classList.remove('hidden');
+}
+
+// Reset interface
+function resetInterface() {
+    document.getElementById('resultContainer').classList.add('hidden');
+    document.getElementById('analyzeButton').classList.remove('hidden');
+    document.getElementById('uploadPrompt').classList.remove('hidden');
+}
+
+// Download report
+function downloadReport() {
+    alert('Fonctionnalité de téléchargement en cours de développement. Bientôt disponible!');
+}
+
+// Setup drag and drop
+function setupDragAndDrop(areaId, inputId) {
+    const dropArea = document.getElementById(areaId);
+    const input = document.getElementById(inputId);
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+        dropArea.classList.add('border-purple-500');
+    }
+    
+    function unhighlight() {
+        dropArea.classList.remove('border-purple-500');
+    }
+    
+    dropArea.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length) {
+            input.files = files;
+            const event = new Event('change');
+            input.dispatchEvent(event);
+        }
+    }
+}
+</script>
+{% endblock %} 

@@ -7,86 +7,107 @@ M.O.G AI (Mastering Optical Grafting) est une plateforme web permettant de réal
 ## 2. Étapes de développement réalisées
 
 ### Phase 1 : Structure initiale
-- Mise en place du backend Flask
-- Création de l'interface utilisateur de base
-- Configuration du système de paiement (préparé pour Stripe)
-- Intégration prévue avec l'API Hugging Face
+- Mise en place du backend Flask avec Blueprint
+- Création de l'interface utilisateur avec Tailwind CSS
+- Configuration du système de routes avec préfixe /web
+- Intégration des extensions Flask (SQLAlchemy, Migrate, Cache, CORS)
 
 ### Phase 2 : Design et UX
 - Interface complètement repensée
 - Ajout d'effets visuels modernes (glassmorphism)
-- Sections principales : Hero, Features, Pricing, FAQ
-- Design responsive et animations
+- Navigation latérale responsive
+- Logo MOG AI cliquable dans l'en-tête
 
-### Phase 3 : Déploiement
-- Configuration pour hébergement sur Render
-- Simplification temporaire (mode démo)
-- Structure prête pour les futures API
+### Phase 3 : Organisation du code
+- Structure modulaire avec blueprints
+- Séparation des routes web et API
+- Organisation des templates
+- Gestion des assets statiques
 
 ## 3. Problèmes rencontrés et solutions
 
 ### Problèmes majeurs
-1. **Limite de taille GitHub**
-   - Problème : Fichier exe de 137 MB dépassant la limite de 100 MB
-   - Solution : Restructuration complète du repository et ajout dans .gitignore
+1. **Structure des routes**
+   - Problème : URLs mal formées et navigation incohérente
+   - Solution : Mise en place d'un système de blueprints hiérarchique avec préfixe /web
 
-2. **Compatibilité Python**
-   - Problème : Versions incompatibles des dépendances
-   - Solution : Mise à jour vers Flask 2.3.3 et Werkzeug 2.3.7
+2. **Gestion des extensions**
+   - Problème : Extensions Flask mal initialisées
+   - Solution : Centralisation dans extensions.py avec gestion des erreurs
 
 ### Problèmes mineurs
-1. **Configuration PowerShell**
-   - Syntaxe différente pour les commandes Git
-   - Adaptation des commandes pour Windows
+1. **Navigation**
+   - Problème : Liens de la sidebar parfois invisibles
+   - Solution : Correction des templates et de la logique de navigation
 
-2. **Dépendances**
-   - Simplification temporaire pour le déploiement
-   - Préparation pour futures intégrations
+2. **Assets statiques**
+   - Problème : Chemins d'accès incohérents
+   - Solution : Configuration correcte des dossiers statiques dans Flask
 
-## 4. Plan pour la suite
+## 4. Structure actuelle du projet
+```
+mog-ai/
+├── src/                        # Code source principal
+│   ├── __init__.py            # Initialisation de l'application
+│   ├── extensions.py          # Extensions Flask
+│   ├── routes/                # Routes de l'application
+│   │   ├── web/              # Routes interface web
+│   │   │   ├── face_swap.py  # Routes face swap
+│   │   │   ├── looks_analysis.py # Routes analyse de look
+│   │   │   └── ai_video.py   # Routes vidéo AI
+│   │   └── api/              # Routes API (à venir)
+│   ├── services/             # Logique métier
+│   ├── models/              # Modèles de données
+│   └── utils/               # Utilitaires
+├── static/                   # Fichiers statiques
+│   ├── css/                # Styles
+│   ├── js/                 # JavaScript
+│   └── images/             # Images et assets
+├── templates/               # Templates HTML
+│   ├── base.html          # Template de base
+│   ├── index.html         # Page d'accueil
+│   └── components/        # Composants réutilisables
+├── instance/               # Configuration instance
+├── tests/                  # Tests
+└── docs/                   # Documentation
+```
+
+## 5. Prochaines étapes
 
 ### Court terme
-1. **Intégration API**
-   - Ajout de l'API Hugging Face
-   - Configuration des variables d'environnement
-   - Tests de performance
+1. **Face Swap**
+   - Intégration de l'API Hugging Face
+   - Interface de téléchargement et prévisualisation
+   - Gestion des erreurs et feedback utilisateur
 
-2. **Système de paiement**
-   - Intégration complète de Stripe
-   - Tests des différents plans
+2. **Analyse de Look**
+   - Développement de l'interface
+   - Intégration des modèles d'analyse
+   - Système de recommandations
+
+3. **Vidéo AI**
+   - Interface de manipulation vidéo
+   - Intégration des modèles de traitement
+   - Gestion du streaming
 
 ### Moyen terme
-1. **Optimisations**
-   - Cache pour les résultats
-   - Compression des images
-   - Amélioration des temps de réponse
+1. **Système de paiement**
+   - Intégration Stripe
+   - Plans d'abonnement
+   - Gestion des crédits
 
-2. **Nouvelles fonctionnalités**
-   - Historique des transformations
-   - Galerie d'exemples
-   - Options de personnalisation
+2. **Optimisations**
+   - Cache des résultats
+   - Compression des médias
+   - Amélioration des performances
 
 ### Long terme
 1. **Scalabilité**
-   - Migration possible vers une architecture microservices
-   - Optimisation de la base de données
+   - Architecture microservices
    - CDN pour les assets
+   - Base de données distribuée
 
-2. **Fonctionnalités avancées**
-   - API publique
-   - Interface d'administration
-   - Analytics et tableaux de bord
-
-## 5. Structure du projet
-```
-mog-ai/
-├── aide/                        # Documentation et ressources
-│   ├── lien.md                 # Liens et accès au site
-│   └── 17-05-2024_projet_mog.md # Journal de développement
-├── templates/                   # Templates Flask
-│   └── index.html              # Interface principale
-├── app.py                      # Application Flask
-├── requirements.txt            # Dépendances
-├── Procfile                    # Configuration Render
-└── gunicorn.conf.py           # Configuration serveur
-``` 
+2. **Analytics**
+   - Tableau de bord administrateur
+   - Métriques d'utilisation
+   - Rapports de performance

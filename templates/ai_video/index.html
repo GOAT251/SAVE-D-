@@ -1,0 +1,596 @@
+{% extends "base.html" %}
+
+{% block title %}Création de Vidéo AI - M.O.G AI{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .text-input-container {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .text-input-container:focus-within {
+        border-color: var(--gradient-end);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .prompt-textarea {
+        background: transparent;
+        border: none;
+        color: #e2e8f0;
+        font-family: 'Poppins', sans-serif;
+        resize: none;
+        width: 100%;
+        height: 150px;
+        outline: none;
+    }
+    
+    .prompt-textarea::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .suggestion-pill {
+        background: rgba(4, 120, 87, 0.15);
+        border: 1px solid rgba(4, 120, 87, 0.3);
+        border-radius: 9999px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+        color: rgba(74, 222, 128, 0.9);
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: inline-block;
+    }
+    
+    .suggestion-pill:hover {
+        background: rgba(4, 120, 87, 0.25);
+        transform: translateY(-1px);
+    }
+    
+    .setting-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        outline: none;
+    }
+    
+    .setting-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        background: linear-gradient(135deg, #10b981, #0ea5e9);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .setting-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(10, 185, 129, 0.5);
+    }
+    
+    .generate-button {
+        background: linear-gradient(60deg, #10b981, #0ea5e9);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .generate-button::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
+    
+    .generate-button:hover::after {
+        left: 100%;
+    }
+    
+    .generate-button:disabled {
+        background: linear-gradient(60deg, #64748b, #94a3b8);
+        cursor: not-allowed;
+    }
+    
+    .progress-ring {
+        transform: rotate(-90deg);
+        transform-origin: center;
+    }
+    
+    .progress-ring-circle {
+        stroke: url(#gradient);
+        stroke-dasharray: 283;
+        stroke-dashoffset: 283;
+        transition: stroke-dashoffset 0.5s ease;
+    }
+    
+    .result-container {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .result-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(31, 38, 135, 0.4);
+    }
+    
+    .tag {
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 9999px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+        color: rgba(16, 185, 129, 1);
+        display: inline-block;
+        margin-right: 0.5rem;
+    }
+    
+    .video-placeholder {
+        position: relative;
+        background: rgba(15, 23, 42, 0.5);
+        aspect-ratio: 16/9;
+        overflow: hidden;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .video-controls {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 48px;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+    }
+    
+    .play-button {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .play-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .action-button {
+        transition: all 0.3s ease;
+    }
+    
+    .action-button:hover {
+        transform: translateY(-2px);
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .animate-pulse {
+        animation: pulse 1.5s infinite;
+    }
+    
+    .section-divider {
+        height: 1px;
+        background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+        margin: 2rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold gradient-text mb-4">Création de Vidéo AI</h1>
+        <p class="text-xl text-gray-300 max-w-2xl mx-auto">Transformez vos idées en vidéos captivantes grâce à notre technologie d'intelligence artificielle avancée.</p>
+    </div>
+    
+    <div class="max-w-6xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-10 mb-12">
+            <!-- Prompt Input Section -->
+            <div class="glass-effect rounded-xl p-8">
+                <h2 class="text-2xl font-bold gradient-text mb-6">Décrivez votre vidéo</h2>
+                <p class="text-gray-300 mb-6">Soyez précis et détaillé dans votre description pour obtenir les meilleurs résultats possibles.</p>
+                
+                <div class="text-input-container p-4 mb-4">
+                    <textarea id="promptInput" class="prompt-textarea" placeholder="Ex: Un papillon volant dans un jardin fleuri au coucher du soleil, avec des couleurs vibrantes et un mouvement fluide..."></textarea>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-200 mb-3">Suggestions</h3>
+                    <div class="flex flex-wrap">
+                        <span class="suggestion-pill" data-prompt="Une cascade en forêt tropicale avec des rayons de soleil">Cascade</span>
+                        <span class="suggestion-pill" data-prompt="Une route sinueuse à travers des montagnes enneigées">Montagnes</span>
+                        <span class="suggestion-pill" data-prompt="Un astronaute flottant dans l'espace avec la Terre en arrière-plan">Espace</span>
+                        <span class="suggestion-pill" data-prompt="Des vagues océaniques au ralenti lors d'une tempête">Océan</span>
+                    </div>
+                </div>
+                
+                <div class="section-divider"></div>
+                
+                <h3 class="text-lg font-semibold text-gray-200 mb-4">Paramètres avancés</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="text-gray-300 text-sm">Durée</label>
+                            <span class="text-gray-400 text-sm" id="durationValue">3 secondes</span>
+                        </div>
+                        <input type="range" min="1" max="10" value="3" class="setting-slider" id="durationSlider">
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="text-gray-300 text-sm">Qualité</label>
+                            <span class="text-gray-400 text-sm" id="qualityValue">Haute</span>
+                        </div>
+                        <input type="range" min="1" max="3" value="2" class="setting-slider" id="qualitySlider">
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="text-gray-300 text-sm">Style artistique</label>
+                            <span class="text-gray-400 text-sm">Réaliste</span>
+                        </div>
+                        <select class="w-full bg-transparent border border-gray-700 text-gray-300 rounded-lg p-2 outline-none focus:border-green-500 transition-all">
+                            <option value="realistic">Réaliste</option>
+                            <option value="animated">Animé</option>
+                            <option value="artistic">Artistique</option>
+                            <option value="cinematic">Cinématographique</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features Section -->
+            <div class="glass-effect rounded-xl p-8">
+                <h2 class="text-2xl font-bold gradient-text mb-6">Fonctionnalités</h2>
+                
+                <div class="space-y-6">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 p-2 bg-green-500/20 rounded-lg mr-4">
+                            <i class="fas fa-film text-green-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-200 mb-1">Génération de vidéo de haute qualité</h3>
+                            <p class="text-gray-400">Créez des vidéos fluides et détaillées à partir de simples descriptions textuelles.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 p-2 bg-green-500/20 rounded-lg mr-4">
+                            <i class="fas fa-pencil-alt text-green-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-200 mb-1">Contrôle créatif complet</h3>
+                            <p class="text-gray-400">Ajustez la durée, la qualité et le style artistique selon vos préférences.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 p-2 bg-green-500/20 rounded-lg mr-4">
+                            <i class="fas fa-magic text-green-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-200 mb-1">Intelligence artificielle avancée</h3>
+                            <p class="text-gray-400">Notre IA comprend les concepts abstraits et les transforme en séquences visuelles captivantes.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 p-2 bg-green-500/20 rounded-lg mr-4">
+                            <i class="fas fa-download text-green-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-200 mb-1">Téléchargement facile</h3>
+                            <p class="text-gray-400">Téléchargez vos créations en différents formats pour un partage rapide sur les réseaux sociaux.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-divider"></div>
+                
+                <div class="bg-green-500/10 rounded-lg p-4 border border-green-500/20">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-crown text-yellow-400 mr-2"></i>
+                        <h3 class="text-lg font-semibold text-gray-200">Avantages Premium</h3>
+                    </div>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-center"><i class="fas fa-check text-green-400 mr-2"></i> Vidéos jusqu'à 30 secondes</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-400 mr-2"></i> Résolution 4K</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-400 mr-2"></i> Édition avancée</li>
+                    </ul>
+                    <button class="w-full mt-4 px-4 py-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg text-white font-medium hover:opacity-90 transition-opacity">
+                        Passer Premium
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Process Button -->
+        <div class="text-center mb-16">
+            <button id="generateButton" class="generate-button px-8 py-4 rounded-xl text-lg font-bold text-white shadow-lg">
+                <i class="fas fa-magic mr-3"></i>Générer ma vidéo
+            </button>
+            <p class="text-gray-400 mt-3 text-sm">Durée estimée de génération: environ 30 secondes</p>
+        </div>
+        
+        <!-- Progress Indicator -->
+        <div id="progressContainer" class="max-w-md mx-auto mb-16 hidden">
+            <div class="flex flex-col items-center">
+                <svg class="progress-ring w-32 h-32" viewBox="0 0 100 100">
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#10b981" />
+                            <stop offset="100%" stop-color="#0ea5e9" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="progress-ring-circle" cx="50" cy="50" r="45" fill="transparent" stroke-width="8"></circle>
+                </svg>
+                <p class="text-xl font-bold text-center mt-4" id="progressText">Génération en cours...</p>
+                <p class="text-gray-400 text-center mt-2" id="progressPercentage">0%</p>
+            </div>
+        </div>
+        
+        <!-- Results Container -->
+        <div id="resultContainer" class="result-container rounded-xl overflow-hidden mb-16 hidden">
+            <div class="p-6 border-b border-gray-700">
+                <h2 class="text-2xl font-bold gradient-text">Votre vidéo</h2>
+                <p class="text-gray-300 mt-2" id="resultPrompt">Un papillon volant dans un jardin fleuri au coucher du soleil...</p>
+                <div class="flex mt-3">
+                    <span class="tag mr-2">3 secondes</span>
+                    <span class="tag">HD</span>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="video-placeholder mb-6">
+                    <i class="fas fa-video text-5xl text-gray-500"></i>
+                    <div class="video-controls">
+                        <div class="play-button mr-3">
+                            <i class="fas fa-play text-white"></i>
+                        </div>
+                        <div class="w-full bg-gray-700 h-1 rounded-full">
+                            <div class="bg-green-500 h-1 rounded-full w-0"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <div class="flex space-x-3">
+                        <button id="downloadVideoBtn" class="action-button bg-gradient-to-r from-green-600 to-blue-500 text-white px-4 py-2 rounded-lg flex items-center">
+                            <i class="fas fa-download mr-2"></i>Télécharger
+                        </button>
+                        <button id="shareVideoBtn" class="action-button glass-effect px-4 py-2 rounded-lg text-gray-300 hover:text-white flex items-center">
+                            <i class="fas fa-share-alt mr-2"></i>Partager
+                        </button>
+                    </div>
+                    
+                    <button id="createNewBtn" class="action-button glass-effect px-4 py-2 rounded-lg text-gray-300 hover:text-white flex items-center">
+                        <i class="fas fa-redo mr-2"></i>Nouvelle vidéo
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- More Ideas Section -->
+        <div class="mb-16">
+            <h2 class="text-2xl font-bold gradient-text mb-8 text-center">Plus d'idées de vidéos</h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="glass-effect rounded-xl overflow-hidden hover:transform hover:scale-102 transition-all hover:shadow-glow">
+                    <div class="h-40 bg-gradient-to-r from-green-600 to-blue-500 flex items-center justify-center">
+                        <i class="fas fa-mountain text-4xl text-white"></i>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-200 mb-2">Paysages naturels</h3>
+                        <p class="text-gray-400 text-sm">Montagnes, océans, forêts et déserts en mouvement.</p>
+                        <button class="w-full mt-4 bg-gradient-to-r from-green-600 to-blue-500 text-white py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+                            Explorer
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="glass-effect rounded-xl overflow-hidden hover:transform hover:scale-102 transition-all hover:shadow-glow">
+                    <div class="h-40 bg-gradient-to-r from-purple-600 to-pink-500 flex items-center justify-center">
+                        <i class="fas fa-rocket text-4xl text-white"></i>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-200 mb-2">Science-fiction</h3>
+                        <p class="text-gray-400 text-sm">Vaisseaux spatiaux, planètes lointaines et technologies futuristes.</p>
+                        <button class="w-full mt-4 bg-gradient-to-r from-purple-600 to-pink-500 text-white py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+                            Explorer
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="glass-effect rounded-xl overflow-hidden hover:transform hover:scale-102 transition-all hover:shadow-glow">
+                    <div class="h-40 bg-gradient-to-r from-yellow-500 to-red-500 flex items-center justify-center">
+                        <i class="fas fa-dragon text-4xl text-white"></i>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-200 mb-2">Fantasy</h3>
+                        <p class="text-gray-400 text-sm">Dragons, créatures magiques et mondes enchantés.</p>
+                        <button class="w-full mt-4 bg-gradient-to-r from-yellow-500 to-red-500 text-white py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+                            Explorer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// DOM elements
+const promptInput = document.getElementById('promptInput');
+const durationSlider = document.getElementById('durationSlider');
+const durationValue = document.getElementById('durationValue');
+const qualitySlider = document.getElementById('qualitySlider');
+const qualityValue = document.getElementById('qualityValue');
+const generateButton = document.getElementById('generateButton');
+const progressContainer = document.getElementById('progressContainer');
+const resultContainer = document.getElementById('resultContainer');
+const resultPrompt = document.getElementById('resultPrompt');
+const downloadVideoBtn = document.getElementById('downloadVideoBtn');
+const shareVideoBtn = document.getElementById('shareVideoBtn');
+const createNewBtn = document.getElementById('createNewBtn');
+
+// Suggestion pills
+document.querySelectorAll('.suggestion-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+        promptInput.value = pill.dataset.prompt;
+    });
+});
+
+// Sliders
+durationSlider.addEventListener('input', () => {
+    const value = durationSlider.value;
+    durationValue.textContent = `${value} seconde${value > 1 ? 's' : ''}`;
+});
+
+qualitySlider.addEventListener('input', () => {
+    const value = parseInt(qualitySlider.value);
+    const qualities = ['Basse', 'Haute', 'Ultra'];
+    qualityValue.textContent = qualities[value - 1];
+});
+
+// Generate button
+generateButton.addEventListener('click', () => {
+    if (!promptInput.value.trim()) {
+        alert('Veuillez entrer une description pour votre vidéo.');
+        return;
+    }
+    
+    // Hide the button and show progress
+    generateButton.classList.add('hidden');
+    document.querySelector('.text-center p').classList.add('hidden');
+    progressContainer.classList.remove('hidden');
+    
+    // Simulate progress
+    let progress = 0;
+    const progressCircle = document.querySelector('.progress-ring-circle');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const progressText = document.getElementById('progressText');
+    const circumference = 2 * Math.PI * 45;
+    
+    const interval = setInterval(function() {
+        progress += 1;
+        const dashoffset = circumference - (progress / 100) * circumference;
+        progressCircle.style.strokeDashoffset = dashoffset;
+        progressPercentage.textContent = progress + '%';
+        
+        if (progress === 30) {
+            progressText.textContent = "Analyse du prompt...";
+        } else if (progress === 60) {
+            progressText.textContent = "Génération des images...";
+        } else if (progress === 90) {
+            progressText.textContent = "Création de la vidéo...";
+        }
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            showResult();
+        }
+    }, 50);
+});
+
+// Show result
+function showResult() {
+    // Hide progress
+    progressContainer.classList.add('hidden');
+    
+    // Set the prompt text
+    resultPrompt.textContent = promptInput.value;
+    
+    // Show result container
+    resultContainer.classList.remove('hidden');
+    
+    // Scroll to result
+    resultContainer.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Download video
+downloadVideoBtn.addEventListener('click', () => {
+    alert('Fonctionnalité de téléchargement en cours de développement. Bientôt disponible!');
+});
+
+// Share video
+shareVideoBtn.addEventListener('click', () => {
+    alert('Fonctionnalité de partage en cours de développement. Bientôt disponible!');
+});
+
+// Create new video
+createNewBtn.addEventListener('click', () => {
+    resultContainer.classList.add('hidden');
+    generateButton.classList.remove('hidden');
+    document.querySelector('.text-center p').classList.remove('hidden');
+    promptInput.value = '';
+    
+    // Scroll back to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Video playback simulation
+document.querySelector('.play-button').addEventListener('click', function() {
+    const progressBar = document.querySelector('.bg-green-500');
+    const playIcon = this.querySelector('i');
+    
+    if (playIcon.classList.contains('fa-play')) {
+        playIcon.classList.remove('fa-play');
+        playIcon.classList.add('fa-pause');
+        
+        // Animate progress bar
+        progressBar.style.transition = 'width 3s linear';
+        progressBar.style.width = '100%';
+        
+        // Reset after 3 seconds
+        setTimeout(() => {
+            progressBar.style.transition = 'none';
+            progressBar.style.width = '0';
+            playIcon.classList.remove('fa-pause');
+            playIcon.classList.add('fa-play');
+            
+            setTimeout(() => {
+                progressBar.style.transition = 'width 3s linear';
+            }, 50);
+        }, 3000);
+    } else {
+        playIcon.classList.remove('fa-pause');
+        playIcon.classList.add('fa-play');
+        
+        // Pause animation (this is a simplified simulation)
+        progressBar.style.transition = 'none';
+    }
+});
+</script>
+{% endblock %} 

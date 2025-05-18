@@ -1,28 +1,68 @@
-#!/usr/bin/env python
-# Flask application for MOG AI - Face Swap Service
-# Version: 1.0.1
-
+from flask import Flask, render_template, request, jsonify
 import os
-import logging
 from dotenv import load_dotenv
 
-# Load environment variables
-try:
-    load_dotenv()
-except Exception as e:
-    print(f"Warning: Could not load .env file: {str(e)}")
+# Charger les variables d'environnement
+load_dotenv()
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[logging.StreamHandler()]
-)
+app = Flask(__name__, 
+           static_folder='static',
+           static_url_path='/static',
+           template_folder='templates')
 
-# Create the Flask application
-from src import create_app
-app = create_app()
+@app.route('/')
+def index():
+    return "Application MOG AI - Version alternative fonctionnelle"
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True) 
+@app.route('/face-swap')
+def face_swap():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Face Swap - Version d'urgence</title>
+        <style>
+            body { 
+                font-family: Arial, sans-serif; 
+                background: #0f172a; 
+                color: white; 
+                text-align: center; 
+                padding: 30px; 
+            }
+            h1 { color: #0ea5e9; }
+            form { margin: 20px auto; max-width: 500px; }
+            .button { 
+                background: #0ea5e9; 
+                color: white; 
+                border: none; 
+                padding: 10px 20px; 
+                border-radius: 5px; 
+                cursor: pointer; 
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Face Swap - Version d'Urgence</h1>
+        <p>Cette page est une version minimale d'urgence qui fonctionne.</p>
+        
+        <form action="/face-swap-process" method="post" enctype="multipart/form-data">
+            <div style="margin: 20px 0;">
+                <label for="source">Image source (visage à utiliser):</label><br>
+                <input type="file" name="source_image" id="source" accept="image/*">
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <label for="target">Image cible (où placer le visage):</label><br>
+                <input type="file" name="target_image" id="target" accept="image/*">
+            </div>
+            
+            <div>
+                <button type="submit" class="button">Échanger les visages</button>
+            </div>
+        </form>
+    </body>
+    </html>
+    """
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5001) 

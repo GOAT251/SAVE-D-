@@ -1,0 +1,24 @@
+# MOG AI - Requirements
+Flask>=2.3.3
+Werkzeug>=2.3.7
+Jinja2>=3.1.2
+python-dotenv>=1.0.0
+Flask-Limiter>=3.5.0
+flask-cors>=4.0.0
+gunicorn>=21.2.0
+pillow>=10.0.1
+redis>=5.0.1
+requests>=2.31.0
+numpy>=1.25.2
+opencv-python-headless>=4.8.0
+SQLAlchemy>=2.0.21
+Flask-SQLAlchemy>=3.1.1
+Flask-Login>=0.6.2
+Flask-WTF>=1.1.1
+Flask-Migrate>=4.0.5
+Flask-RESTful>=0.3.10
+pytest>=7.4.2
+pytest-cov>=4.1.0
+black>=23.9.1
+flake8>=6.1.0
+python-jose>=3.3.0 

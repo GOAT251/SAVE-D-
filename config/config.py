@@ -1,5 +1,9 @@
 import os
 from datetime import timedelta
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(os.path.join('instance', '.env'))
 
 # Configuration de base
 DEBUG = True
@@ -19,8 +23,10 @@ HOST = '0.0.0.0'
 PORT = int(os.getenv('PORT', 5000))
 
 class Config:
+    """Base configuration."""
     # Flask
-    SECRET_KEY = SECRET_KEY
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev')
+    FLASK_ENV = os.environ.get('FLASK_ENV', 'development')
     
     # Base de données
     SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI
@@ -31,7 +37,7 @@ class Config:
     CACHE_DEFAULT_TIMEOUT = CACHE_DEFAULT_TIMEOUT
     
     # API
-    HUGGINGFACE_API_KEY = None
+    HUGGING_FACE_API_KEY = os.environ.get('HUGGING_FACE_API_KEY')
     
     # Stripe
     STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
@@ -47,9 +53,18 @@ class Config:
     RATELIMIT_STORAGE_URL = "memory://"
     
     # Upload
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max
-    UPLOAD_FOLDER = 'static/uploads'
+    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 5 * 1024 * 1024))  # 5MB
+    UPLOAD_FOLDER = os.path.join('static', 'uploads')
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+    # Demo Mode
+    DEMO_MODE = os.getenv('DEMO_MODE', True)
+
+    # Redis
+    REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+
+    # Ensure upload folder exists
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 class DevelopmentConfig(Config):
     DEBUG = True

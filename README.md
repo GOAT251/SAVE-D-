@@ -1,166 +1,175 @@
-# M.O.G AI
+# M.O.G AI - Face Swap Application
 
-<p align="center">
-  <img src="static/images/logo.svg" alt="MOG AI Logo" width="200"/>
-</p>
+## Overview
+M.O.G AI (Mastering Optical Grafting) is a Flask-based web application that provides face swapping capabilities using advanced AI technology. The application supports both local processing and API-based face swapping through HuggingFace.
 
-## Description (Mise à jour 17/05/2025)
-M.O.G AI est une application Flask moderne offrant des services d'IA, notamment :
-- Face Swap : Échange de visages entre deux images
-- Dashboard de monitoring en temps réel
-- Interface utilisateur moderne avec design glassmorphism
+## Features
+- Face detection and swapping
+- Modern, responsive UI
+- Real-time processing
+- Support for multiple image formats
+- Rate limiting and caching
+- Dashboard with usage statistics
 
-## Repositories
-- Main Repository: [MOGGIGN](https://github.com/GOAT251/moggign)
-- Backup Repository: [SAVE](https://github.com/GOAT251/SAVE)
+## Quick Start
 
-## Interface Interactive
-Pour interagir avec le développement :
-- ✅ Continuer le développement
-- ⛔ Arrêter le développement
-- ❓ Poser une question
-- 🔄 Voir le statut actuel
-
-## Prérequis
+### Prerequisites
 - Python 3.8+
-- Redis (optionnel, pour le cache en production)
-- Base de données SQLite (dev) ou PostgreSQL (prod)
+- Redis (for caching)
+- Virtual environment (recommended)
 
-## Installation
+### Installation
 
-1. Cloner le repository
+1. Clone the repository:
 ```bash
-git clone https://github.com/GOAT251/moggign.git
-cd moggign
+git clone https://github.com/yourusername/mog-ai.git
+cd mog-ai
 ```
 
-2. Créer un environnement virtuel
+2. Create and activate virtual environment:
 ```bash
 python -m venv venv
+.\venv\Scripts\activate  # Windows
 source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
 ```
 
-3. Installer les dépendances
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Configuration
-Créer un fichier `.env` à la racine du projet :
+4. Create .env file in instance/ directory:
 ```env
 FLASK_APP=src
 FLASK_ENV=development
 SECRET_KEY=your-secret-key
-DATABASE_URL=sqlite:///app.db
+HUGGING_FACE_API_KEY=your-api-key  # Optional for API mode
+REDIS_URL=redis://localhost:6379
+MAX_CONTENT_LENGTH=5242880
 ```
 
-## Structure du Projet (17/05/2025)
-```
-mog-ai/
-├── src/                    # Code source principal
-│   ├── __init__.py        # Initialisation de l'application
-│   ├── routes/            # Routes et contrôleurs
-│   │   ├── web.py        # Routes interface web
-│   │   └── api.py        # Routes API
-│   ├── services/          # Logique métier
-│   │   └── face_swap_service.py  # Service de face swap
-│   ├── models/           # Modèles de données
-│   └── utils/            # Utilitaires
-├── static/               # Fichiers statiques
-│   ├── images/          # Images et assets
-│   ├── css/            # Styles
-│   └── js/             # JavaScript
-├── templates/           # Templates HTML
-│   ├── index.html      # Page d'accueil
-│   ├── faceswap.html   # Page de face swap
-│   └── dashboard.html   # Dashboard
-├── config/             # Configuration
-├── tests/             # Tests unitaires
-├── instance/          # Données d'instance
-└── uploads/           # Dossier des uploads temporaires
-```
+### Running the Application
 
-## Fonctionnalités Implémentées (17/05/2025)
-- ✅ Interface utilisateur avec sidebar responsive
-- ✅ Système de face swap via HuggingFace API
-- ✅ Dashboard avec statistiques en temps réel
-- ✅ Gestion des uploads d'images
-- ✅ Monitoring système
-
-## Technologies
-- Backend: Flask 2.0+
-- Frontend: TailwindCSS, Chart.js
-- Base de données: SQLite (dev) / PostgreSQL (prod)
-- Cache: Redis (optionnel)
-
-## Développement Backend en cours
-
-### Fonctionnalités implémentées :
-- ✅ Structure scalable
-- ✅ Configuration multi-environnement
-- ✅ Système de cache
-- ✅ Tests unitaires
-- ✅ Monitoring
-
-### En cours d'implémentation :
-- 🔄 Routes API
-- 🔄 Modèles de données
-- 🔄 Services métier
-- 🔄 Validation des données
-
-## Développement
-
-1. Lancer le serveur de développement
+#### Development Mode
 ```bash
+# Windows
+.\scripts\start.bat
+
+# Linux/Mac
+export FLASK_APP=src
+export FLASK_ENV=development
 flask run
 ```
 
-2. Exécuter les tests
+#### Production Mode
 ```bash
-pytest
-pytest --cov=src tests/  # avec couverture
+gunicorn -c deployment/gunicorn.conf.py "src:create_app()"
 ```
 
-## Déploiement
+## Project Structure
+See [aide/structure_scalable.md](aide/structure_scalable.md) for detailed project structure documentation.
 
-### Local
+## Development
+
+### Setting Up Development Environment
+1. Install development dependencies:
 ```bash
-# Démarrer en local
-./start_local.bat  # Windows
+pip install -r requirements.txt
 ```
 
-### Production (Render)
-L'application est déployée sur Render à l'adresse suivante :
-[https://mog-ai.onrender.com](https://mog-ai.onrender.com)
+2. Set up pre-commit hooks:
+```bash
+pre-commit install
+```
 
-Configuration Render :
-- Build Command: `pip install -r requirements.txt`
-- Start Command: `gunicorn "src:create_app()"`
-- Python Version: 3.8
-- Environment Variables:
-  - `FLASK_APP=src`
-  - `FLASK_ENV=production`
-  - `SECRET_KEY=[votre-clé-secrète]`
-  - `DATABASE_URL=[url-de-votre-base-de-données]`
+### Running Tests
+```bash
+python -m pytest
+```
 
-## Progrès du Développement
-Dernière mise à jour : 15/05/2024
-- ✅ Implémentation de la structure scalable
-- ✅ Configuration du déploiement Render
-- ✅ Intégration du logo dans l'interface
-- 🔄 Optimisation des performances
-- 🔄 Tests d'intégration
+### Code Style
+- Follow PEP 8 guidelines
+- Use type hints
+- Write docstrings for functions and classes
 
-## Contribution
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
+## API Documentation
+
+### Face Swap Endpoint
+- **URL**: `/api/v1/face-swap`
+- **Method**: `POST`
+- **Body**: 
+  - `source_image`: Face to use
+  - `target_image`: Image to place the face on
+- **Response**: Base64 encoded result image
+
+## Configuration
+
+### Environment Variables
+- `FLASK_APP`: Application entry point
+- `FLASK_ENV`: Environment (development/production)
+- `SECRET_KEY`: Application secret key
+- `HUGGING_FACE_API_KEY`: API key for HuggingFace (optional)
+- `REDIS_URL`: Redis connection URL
+- `MAX_CONTENT_LENGTH`: Maximum upload size
+
+### Configuration Files
+- `config/config.py`: Main configuration
+- `deployment/gunicorn.conf.py`: Gunicorn settings
+- `instance/.env`: Environment variables
+
+## Maintenance
+
+### Regular Tasks
+1. Run cleanup script:
+```bash
+python scripts/clean.py
+```
+
+2. Update dependencies:
+```bash
+pip install --upgrade -r requirements.txt
+```
+
+3. Run tests:
+```bash
+python -m pytest
+```
+
+### Monitoring
+- Check application logs in `logs/`
+- Monitor Redis cache usage
+- Review dashboard metrics
+
+## Troubleshooting
+
+### Common Issues
+
+1. Application won't start
+- Check if Redis is running
+- Verify environment variables
+- Ensure all dependencies are installed
+
+2. Face swap fails
+- Verify image formats
+- Check image sizes
+- Ensure face is detectable in images
+
+3. Performance issues
+- Clear Redis cache
+- Run cleanup script
+- Check server resources
+
+## Contributing
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
-[MIT License]
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contact
-[GOAT251] 
+## Acknowledgments
+- HuggingFace for AI models
+- Flask team for the web framework
+- OpenCV team for image processing 

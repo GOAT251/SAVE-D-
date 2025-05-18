@@ -1,382 +1,192 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face Swap - M.O.G AI</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            min-height: 100vh;
-            color: #e2e8f0;
-        }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        }
-        .gradient-border {
-            position: relative;
-            border-radius: 1rem;
-            background: linear-gradient(60deg, #4f46e5 0%, #0ea5e9 100%);
-            padding: 1px;
-        }
-        .gradient-text {
-            background: linear-gradient(to right, #4f46e5, #0ea5e9);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .upload-zone {
-            transition: all 0.3s ease;
-            border: 2px dashed rgba(255, 255, 255, 0.2);
-        }
-        .upload-zone:hover {
-            border-color: #0ea5e9;
-            transform: translateY(-2px);
-        }
-        .btn-gradient {
-            background: linear-gradient(60deg, #4f46e5 0%, #0ea5e9 100%);
-            transition: all 0.3s ease;
-        }
-        .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            overflow: hidden;
-            position: relative;
-        }
-        .progress-bar-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background: linear-gradient(60deg, #4f46e5 0%, #0ea5e9 100%);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        /* Sidebar styles */
-        .sidebar {
-            width: 80px;
-            transition: width 0.3s ease;
-            overflow: hidden;
-            z-index: 100;
-        }
-        .sidebar:hover {
-            width: 240px;
-        }
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            color: #e2e8f0;
-            text-decoration: none;
-            transition: background 0.3s ease;
-            border-radius: 0.5rem;
-            margin: 0.5rem;
-        }
-        .sidebar-link:hover, .sidebar-link.active {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .sidebar-icon {
-            min-width: 2.5rem;
-            display: flex;
-            justify-content: center;
-        }
-        .sidebar-text {
-            margin-left: 1rem;
-            white-space: nowrap;
-        }
-    </style>
-</head>
-<body class="flex h-screen overflow-hidden">
-    <!-- Sidebar -->
-    <aside class="sidebar glass-effect h-screen flex flex-col">
-        <div class="p-4 flex items-center justify-center">
-            <img src="{{ url_for('web.serve_asset', filename='logo.svg') }}" alt="MOG AI Logo" class="h-12 w-12">
-            <span class="sidebar-text text-xl font-bold gradient-text">M.O.G AI</span>
+{% extends "base.html" %}
+
+{% block title %}Face Swap - M.O.G AI{% endblock %}
+
+{% block nav_title %}Face Swap{% endblock %}
+
+{% block extra_styles %}
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+.progress-bar-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(60deg, #4f46e5 0%, #0ea5e9 100%);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+{% endblock %}
+
+{% block content %}
+<!-- Main Content Area -->
+<div class="p-6">
+    <div class="container mx-auto max-w-6xl">
+        <!-- Upload Section -->
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Source Image Upload -->
+            <div class="glass-effect p-6 rounded-xl">
+                <h2 class="text-xl font-semibold mb-4">Image Source</h2>
+                <div class="upload-zone rounded-lg p-8 text-center cursor-pointer" id="sourceUpload">
+                    <i class="fas fa-cloud-upload-alt text-4xl mb-4 text-gray-400"></i>
+                    <p class="text-gray-300">Glissez et déposez votre image source ici<br>ou cliquez pour sélectionner</p>
+                    <input type="file" class="hidden" id="sourceInput" accept="image/*">
+                </div>
+                <div id="sourcePreview" class="mt-4 hidden">
+                    <img src="" alt="Source Preview" class="w-full rounded-lg">
+                </div>
+            </div>
+
+            <!-- Target Image Upload -->
+            <div class="glass-effect p-6 rounded-xl">
+                <h2 class="text-xl font-semibold mb-4">Image Cible</h2>
+                <div class="upload-zone rounded-lg p-8 text-center cursor-pointer" id="targetUpload">
+                    <i class="fas fa-cloud-upload-alt text-4xl mb-4 text-gray-400"></i>
+                    <p class="text-gray-300">Glissez et déposez votre image cible ici<br>ou cliquez pour sélectionner</p>
+                    <input type="file" class="hidden" id="targetInput" accept="image/*">
+                </div>
+                <div id="targetPreview" class="mt-4 hidden">
+                    <img src="" alt="Target Preview" class="w-full rounded-lg">
+                </div>
+            </div>
         </div>
-        <div class="flex-1 flex flex-col mt-8">
-            <a href="{{ url_for('web.index') }}" class="sidebar-link">
-                <div class="sidebar-icon"><i class="fas fa-home text-xl"></i></div>
-                <span class="sidebar-text">Accueil</span>
-            </a>
-            <a href="{{ url_for('web.faceswap') }}" class="sidebar-link active">
-                <div class="sidebar-icon"><i class="fas fa-exchange-alt text-xl"></i></div>
-                <span class="sidebar-text">Face Swap</span>
-            </a>
-            <a href="{{ url_for('web.dashboard') }}" class="sidebar-link">
-                <div class="sidebar-icon"><i class="fas fa-chart-line text-xl"></i></div>
-                <span class="sidebar-text">Dashboard</span>
-            </a>
-            <a href="#" class="sidebar-link">
-                <div class="sidebar-icon"><i class="fas fa-cog text-xl"></i></div>
-                <span class="sidebar-text">Paramètres</span>
-            </a>
+
+        <!-- Process Button -->
+        <div class="text-center mt-8">
+            <button id="processButton" class="btn-gradient px-8 py-4 rounded-xl text-lg font-semibold" disabled>
+                Lancer le Face Swap
+            </button>
         </div>
-        <div class="mt-auto mb-8">
-            <a href="#" class="sidebar-link">
-                <div class="sidebar-icon"><i class="fas fa-question-circle text-xl"></i></div>
-                <span class="sidebar-text">Aide</span>
-            </a>
+
+        <!-- Progress Bar -->
+        <div class="mt-8 max-w-xl mx-auto hidden" id="progressContainer">
+            <div class="flex justify-between mb-2">
+                <span class="text-sm text-gray-400">Traitement en cours...</span>
+                <span class="text-sm text-gray-400" id="progressText">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
         </div>
-    </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto">
-        <!-- Navigation -->
-        <nav class="glass-effect sticky top-0 z-40 px-6 py-4">
-            <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold gradient-text">Face Swap</h1>
-                <div class="flex items-center space-x-4">
-                    <a href="#" class="btn-gradient px-4 py-2 rounded-lg">Connexion</a>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Main Tool Section -->
-        <section class="py-10 px-4">
-            <div class="container mx-auto max-w-5xl">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold mb-4 gradient-text">Échangez des visages avec l'IA</h2>
-                    <p class="text-gray-300">Notre technologie de face swap utilise une intelligence artificielle avancée pour échanger les visages entre deux images avec un résultat naturel et réaliste.</p>
-                </div>
-                
-                <div class="gradient-border">
-                    <div class="glass-effect p-8 rounded-2xl relative overflow-hidden">
-                        <!-- Progress Bar -->
-                        <div class="mb-8">
-                            <div class="progress-bar">
-                                <div class="progress-bar-fill" id="progressBar"></div>
-                            </div>
-                            <div class="text-center mt-2 text-sm text-gray-400" id="progressText">
-                                En attente des images...
-                            </div>
-                        </div>
-
-                        <div class="grid md:grid-cols-2 gap-8">
-                            <div class="space-y-6">
-                                <div class="upload-zone p-6 rounded-xl text-center cursor-pointer hover:bg-opacity-10 bg-white bg-opacity-5">
-                                    <label class="block cursor-pointer">
-                                        <span class="text-lg font-medium text-gray-200">Image source</span>
-                                        <p class="text-sm text-gray-400 mt-2">Visage à utiliser</p>
-                                        <input type="file" id="sourceImage" accept="image/*" class="hidden">
-                                        <div id="sourcePreview" class="mt-4 rounded-lg overflow-hidden hidden">
-                                            <img class="w-full h-48 object-cover" src="" alt="Aperçu">
-                                        </div>
-                                        <div class="mt-4 flex items-center justify-center">
-                                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div class="upload-zone p-6 rounded-xl text-center cursor-pointer hover:bg-opacity-10 bg-white bg-opacity-5">
-                                    <label class="block cursor-pointer">
-                                        <span class="text-lg font-medium text-gray-200">Image cible</span>
-                                        <p class="text-sm text-gray-400 mt-2">Où placer le visage</p>
-                                        <input type="file" id="targetImage" accept="image/*" class="hidden">
-                                        <div id="targetPreview" class="mt-4 rounded-lg overflow-hidden hidden">
-                                            <img class="w-full h-48 object-cover" src="" alt="Aperçu">
-                                        </div>
-                                        <div class="mt-4 flex items-center justify-center">
-                                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="space-y-6">
-                                <div class="glass-effect p-6 rounded-xl">
-                                    <h3 class="text-xl font-semibold mb-4 text-center">
-                                        <span class="gradient-text">
-                                            Prix: 5.00 € (Mode démo)
-                                        </span>
-                                    </h3>
-                                    <div id="card-element" class="p-4 rounded-lg bg-white bg-opacity-5">
-                                        Mode démo - pas de paiement requis
-                                    </div>
-                                </div>
-
-                                <button id="generateBtn" class="w-full btn-gradient py-4 rounded-xl text-lg font-semibold flex items-center justify-center space-x-2">
-                                    <i class="fas fa-magic"></i>
-                                    <span>Générer</span>
-                                </button>
-
-                                <div id="result" class="hidden">
-                                    <div class="glass-effect p-4 rounded-xl">
-                                        <h4 class="text-lg font-semibold mb-2">Résultat</h4>
-                                        <img id="resultImage" class="w-full rounded-lg" src="" alt="Image générée">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Result Section -->
+        <div class="mt-8 hidden" id="resultContainer">
+            <div class="glass-effect p-6 rounded-xl">
+                <h2 class="text-xl font-semibold mb-4">Résultat</h2>
+                <div class="relative">
+                    <img src="" alt="Result" class="w-full rounded-lg" id="resultImage">
+                    <div class="absolute top-4 right-4 space-x-2">
+                        <button class="btn-gradient p-2 rounded-lg" id="downloadButton">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="glass-effect p-2 rounded-lg" id="shareButton">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-        <!-- Example Results Section -->
-        <section class="py-12 px-4 bg-gradient-to-b from-transparent to-black/20">
-            <div class="container mx-auto max-w-6xl">
-                <h2 class="text-3xl font-bold mb-8 gradient-text">Exemples de Résultats</h2>
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="glass-effect p-4 rounded-xl overflow-hidden">
-                        <div class="aspect-w-1 aspect-h-1 mb-3">
-                            <img src="{{ url_for('static', filename='images/example1.jpg') }}" alt="Exemple 1" class="w-full h-60 object-cover rounded-lg">
-                        </div>
-                        <p class="text-gray-300 text-sm">Échange de visage professionnel</p>
-                    </div>
-                    <div class="glass-effect p-4 rounded-xl overflow-hidden">
-                        <div class="aspect-w-1 aspect-h-1 mb-3">
-                            <img src="{{ url_for('static', filename='images/example2.jpg') }}" alt="Exemple 2" class="w-full h-60 object-cover rounded-lg">
-                        </div>
-                        <p class="text-gray-300 text-sm">Transformation artistique</p>
-                    </div>
-                    <div class="glass-effect p-4 rounded-xl overflow-hidden">
-                        <div class="aspect-w-1 aspect-h-1 mb-3">
-                            <img src="{{ url_for('static', filename='images/example3.jpg') }}" alt="Exemple 3" class="w-full h-60 object-cover rounded-lg">
-                        </div>
-                        <p class="text-gray-300 text-sm">Résultat haute définition</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- FAQ Section -->
-        <section class="py-16 px-4">
-            <div class="container mx-auto max-w-3xl">
-                <h2 class="text-3xl font-bold text-center mb-8 gradient-text">Questions Fréquentes</h2>
-                <div class="space-y-6">
-                    <div class="glass-effect p-6 rounded-xl">
-                        <h3 class="text-xl font-semibold mb-2">Comment fonctionne le face swap ?</h3>
-                        <p class="text-gray-300">Notre technologie utilise des algorithmes avancés d'intelligence artificielle pour analyser et fusionner les visages de manière naturelle et réaliste.</p>
-                    </div>
-                    <div class="glass-effect p-6 rounded-xl">
-                        <h3 class="text-xl font-semibold mb-2">Mes images sont-elles sécurisées ?</h3>
-                        <p class="text-gray-300">Absolument. Toutes les images sont traitées de manière sécurisée et supprimées de nos serveurs après traitement.</p>
-                    </div>
-                    <div class="glass-effect p-6 rounded-xl">
-                        <h3 class="text-xl font-semibold mb-2">Quelle est la qualité des résultats ?</h3>
-                        <p class="text-gray-300">Nous garantissons des résultats de haute qualité grâce à notre technologie de pointe et nos modèles d'IA optimisés.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="py-8 px-4 bg-black/20">
-            <div class="container mx-auto">
-                <div class="border-t border-gray-800 pt-8 text-center">
-                    <p class="text-gray-400">&copy; 2024 M.O.G AI - Tous droits réservés</p>
-                </div>
-            </div>
-        </footer>
-    </main>
-
-    <script>
-        // Progress bar functionality
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const sourceImage = document.getElementById('sourceImage');
-        const targetImage = document.getElementById('targetImage');
-        const generateBtn = document.getElementById('generateBtn');
-        const result = document.getElementById('result');
-        const resultImage = document.getElementById('resultImage');
-
-        function updateProgress(progress, text) {
-            progressBar.style.width = `${progress}%`;
-            progressText.textContent = text;
+{% block scripts %}
+<script>
+    // File upload handling
+    function handleFileUpload(input, previewContainer, previewImage) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+            checkProcessButton();
         }
+    }
 
-        // Preview functions
-        function handleImageUpload(inputElement, previewElement) {
-            const file = inputElement.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = previewElement.querySelector('img');
-                    img.src = e.target.result;
-                    previewElement.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        }
+    // Initialize upload zones
+    document.getElementById('sourceUpload').addEventListener('click', () => {
+        document.getElementById('sourceInput').click();
+    });
 
-        // Event listeners
-        sourceImage.addEventListener('change', function(e) {
-            handleImageUpload(this, document.getElementById('sourcePreview'));
-            if (targetImage.files.length > 0) {
-                updateProgress(50, 'Les deux images sont prêtes');
-            } else {
-                updateProgress(25, 'Image source chargée');
-            }
-        });
+    document.getElementById('targetUpload').addEventListener('click', () => {
+        document.getElementById('targetInput').click();
+    });
 
-        targetImage.addEventListener('change', function(e) {
-            handleImageUpload(this, document.getElementById('targetPreview'));
-            if (sourceImage.files.length > 0) {
-                updateProgress(50, 'Les deux images sont prêtes');
-            } else {
-                updateProgress(25, 'Image cible chargée');
-            }
-        });
+    // Handle file selection
+    document.getElementById('sourceInput').addEventListener('change', function() {
+        handleFileUpload(
+            this,
+            document.getElementById('sourcePreview'),
+            document.getElementById('sourcePreview').querySelector('img')
+        );
+    });
 
-        generateBtn.addEventListener('click', function() {
-            if (sourceImage.files.length === 0 || targetImage.files.length === 0) {
-                alert('Veuillez sélectionner les deux images');
-                return;
-            }
+    document.getElementById('targetInput').addEventListener('change', function() {
+        handleFileUpload(
+            this,
+            document.getElementById('targetPreview'),
+            document.getElementById('targetPreview').querySelector('img')
+        );
+    });
 
-            updateProgress(75, 'Génération en cours...');
-            
-            // Create form data
-            const formData = new FormData();
-            formData.append('source_image', sourceImage.files[0]);
-            formData.append('target_image', targetImage.files[0]);
-            
-            // Send API request
-            fetch('/process-faceswap', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                updateProgress(100, 'Génération terminée!');
-                
-                if (data.success) {
-                    resultImage.src = `data:image/jpeg;base64,${data.result}`;
-                    result.classList.remove('hidden');
-                } else {
-                    alert(`Erreur: ${data.error}`);
-                }
-            })
-            .catch(error => {
-                updateProgress(0, 'Erreur de génération');
-                alert(`Erreur: ${error.message}`);
-            });
-        });
-
-        // Active link highlighting
-        const currentPath = window.location.pathname;
-        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    // Enable/disable process button
+    function checkProcessButton() {
+        const sourceFile = document.getElementById('sourceInput').files[0];
+        const targetFile = document.getElementById('targetInput').files[0];
+        const processButton = document.getElementById('processButton');
         
-        sidebarLinks.forEach(link => {
-            if (link.getAttribute('href') === currentPath) {
-                link.classList.add('active');
-            } else {
-                link.classList.remove('active');
+        processButton.disabled = !(sourceFile && targetFile);
+        if (!processButton.disabled) {
+            processButton.classList.add('hover:opacity-80');
+        } else {
+            processButton.classList.remove('hover:opacity-80');
+        }
+    }
+
+    // Process button click handler
+    document.getElementById('processButton').addEventListener('click', function() {
+        // Show progress container
+        document.getElementById('progressContainer').classList.remove('hidden');
+        
+        // Simulate progress (replace with actual API call)
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 5;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${progress}%`;
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                // Show result container
+                document.getElementById('resultContainer').classList.remove('hidden');
+                // Set result image (replace with actual result)
+                document.getElementById('resultImage').src = document.getElementById('targetPreview').querySelector('img').src;
             }
-        });
-    </script>
-</body>
-</html> 
+        }, 200);
+    });
+
+    // Download button click handler
+    document.getElementById('downloadButton').addEventListener('click', function() {
+        const resultImage = document.getElementById('resultImage').src;
+        const link = document.createElement('a');
+        link.href = resultImage;
+        link.download = 'face-swap-result.jpg';
+        link.click();
+    });
+
+    // Share button click handler
+    document.getElementById('shareButton').addEventListener('click', function() {
+        // Implement share functionality
+        alert('Fonctionnalité de partage à venir !');
+    });
+</script>
+{% endblock %} 

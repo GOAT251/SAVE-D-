@@ -1,7 +1,13 @@
-# Environment variables
+# Environment Variables & Secrets
 .env
-.env.*
+.env.local
+.env.*.local
 !.env.example
+
+# Instance-specific files
+instance/*
+!instance/.gitkeep
+!instance/.env.example
 
 # Python
 __pycache__/
@@ -30,38 +36,49 @@ venv/
 ENV/
 env/
 
-# IDE
+# IDE and Editor Files
 .idea/
 .vscode/
 *.swp
 *.swo
+.DS_Store
 
-# Database
-*.db
-*.sqlite3
-*.sqlite
-
-# Logs
+# Logs and Databases
 *.log
 logs/
-log/
+*.db
+*.sqlite3
 
-# Cache
+# User Uploads
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Cache and Temporary Files
 .cache/
+__pycache__/
+.coverage
+htmlcov/
+
+# Development Files
+*.dev
 .pytest_cache/
-flask_monitoringdashboard.db
+.coverage
+coverage.xml
+*.cover
 
-# Uploads
-uploads/
-media/
+# Build and Distribution
+dist/
+build/
+*.egg-info/
 
-# OS
-.DS_Store
-Thumbs.db
+# Large Files and Binaries
+*.exe
+*.dll
+*.so
+*.dylib
 
-# Local development
-instance/
-.webassets-cache
+# Keep Important Empty Directories
+!.gitkeep
 
 # Large files
 GitHubDesktopSetup-x64.exe 

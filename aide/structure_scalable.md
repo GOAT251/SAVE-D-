@@ -1,106 +1,283 @@
-# Structure Scalable - M.O.G AI
+# M.O.G AI - Project Structure Documentation
 
-## Architecture du Projet
+## Core Project Structure
 
 ```
 mog-ai/
-├── src/                        # Code source principal
-│   ├── __init__.py            # Initialisation de l'application
-│   ├── extensions.py          # Extensions Flask (DB, Cache, etc.)
-│   ├── routes/                # Routes et endpoints
-│   │   ├── api/              # API REST
-│   │   └── web/              # Routes web
-│   ├── models/               # Modèles de données
-│   ├── services/            # Logique métier
-│   └── utils/               # Utilitaires et helpers
-├── config/                  # Configuration
-│   └── config.py           # Classes de configuration
-├── static/                 # Fichiers statiques
-│   ├── css/               # Styles
-│   ├── js/                # JavaScript
-│   └── images/            # Images
-├── templates/             # Templates HTML
-├── tests/                # Tests unitaires et d'intégration
-└── aide/                 # Documentation
+├── .gitignore                     # Git ignore patterns (stays in root)
+├── README.md                      # Project documentation (stays in root)
+│
+├── src/                          # Main application source code
+│   ├── __init__.py              # App initialization and factory
+│   ├── extensions.py            # Flask extensions setup
+│   ├── routes/                  # All application routes
+│   │   ├── web/                # Web interface routes
+│   │   │   ├── __init__.py    # Main web routes
+│   │   │   ├── face_swap.py   # Face swap interface routes
+│   │   │   └── dashboard.py   # Dashboard routes
+│   │   └── api/               # API routes
+│   │       ├── __init__.py    # API initialization
+│   │       └── face_swap.py   # Face swap API endpoints
+│   ├── services/                # Business logic services
+│   │   └── face_swap/         # Face swap service
+│   │       ├── __init__.py    # Service initialization
+│   │       ├── service.py     # Main service logic
+│   │       ├── processor.py   # Image processing
+│   │       └── validator.py   # Input validation
+│   ├── models/                  # Data models
+│   │   └── __init__.py        # Models initialization
+│   └── utils/                  # Utility functions
+│       ├── image_utils.py     # Image manipulation utilities
+│       └── security.py       # Security utilities
+│
+├── deployment/                   # Deployment configuration
+│   ├── gunicorn.conf.py        # Gunicorn config
+│   ├── Procfile               # Heroku config
+│   └── requirements.txt       # Python dependencies
+│
+├── instance/                     # Instance-specific files (gitignored)
+│   ├── .env                    # Environment variables
+│   └── flask_monitoringdashboard.db  # Performance monitoring DB
+│
+├── config/                      # Configuration files
+│   ├── __init__.py            # Config initialization
+│   └── config.py              # Main configuration
+│
+├── static/                      # Static files
+│   ├── css/                   # Stylesheets
+│   ├── js/                    # JavaScript files
+│   ├── images/                # Image assets
+│   │   ├── assets/           # UI assets (logos, icons)
+│   │   └── examples/         # Example images
+│   └── uploads/              # User uploads (temporary)
+│
+├── templates/                   # HTML templates
+│   ├── base.html             # Base template
+│   ├── index.html           # Landing page
+│   ├── dashboard.html       # Dashboard template
+│   └── face_swap/          # Face swap templates
+│       └── index.html      # Face swap interface
+│
+├── scripts/                     # Utility scripts
+│   ├── clean.py             # Cleanup script
+│   └── start.bat           # Windows startup script
+│
+├── tests/                      # Test suite
+│   ├── __init__.py
+│   ├── conftest.py         # Test configuration
+│   ├── test_services/     # Service tests
+│   └── test_routes/      # Route tests
+│
+├── docs/                       # Documentation
+│   ├── api/                  # API documentation
+│   ├── deployment/          # Deployment guides
+│   └── development/        # Development guides
+│
+└── aide/                       # Additional documentation
+    └── structure_scalable.md  # Project structure guide
+
 ```
 
-## Avantages de cette Structure
+## File Organization Rules
 
-### 1. Séparation des Responsabilités
-- **Routes** : Gestion des requêtes HTTP
-- **Services** : Logique métier
-- **Models** : Interaction avec la base de données
-- **Utils** : Fonctions réutilisables
+### Root Directory Files
+Only essential project files should remain in the root directory:
+- `.gitignore` - Git ignore patterns
+- `README.md` - Project documentation
 
-### 2. Scalabilité
-- Architecture modulaire permettant l'ajout facile de nouvelles fonctionnalités
-- Possibilité de déployer différents composants séparément
-- Cache configurable pour les performances
-- Rate limiting pour la protection de l'API
+### Deployment Files (`deployment/`)
+All deployment-related files:
+- `requirements.txt` - Python dependencies
+- `gunicorn.conf.py` - Gunicorn configuration
+- `Procfile` - Heroku configuration
 
-### 3. Maintenance
-- Code organisé et facile à maintenir
-- Tests unitaires séparés
-- Configuration centralisée
+### Instance Files (`instance/`)
+Instance-specific files that should not be versioned:
+- `.env` - Environment variables
+- `flask_monitoringdashboard.db` - Monitoring database
+- Temporary files
+- Local configurations
 
-### 4. Sécurité
-- Gestion des sessions sécurisée
-- Protection CORS
-- Limitation de taille des uploads
-- Rate limiting configurable
+## Essential Components
 
-### 5. Performance
-- Système de cache intégré
-- Possibilité de mise en cache Redis en production
-- Optimisation des assets statiques
+### 1. Core Application (`src/`)
+- **__init__.py**: Application factory and initialization
+- **extensions.py**: Flask extensions setup
+- **routes/**: All application endpoints
+- **services/**: Core business logic
+- **utils/**: Shared utilities
 
-## Extensions Intégrées
+### 2. Configuration (`config/`)
+- **config.py**: Environment-specific configurations
+- **.env**: Environment variables (in instance/)
 
-1. **Flask-SQLAlchemy**
-   - ORM pour la base de données
-   - Migrations de base de données
+### 3. Templates and Static Files
+- **templates/**: All HTML templates
+- **static/**: CSS, JavaScript, images
+- **uploads/**: Temporary file storage
 
-2. **Flask-Caching**
-   - Mise en cache des réponses API
-   - Cache Redis en production
+### 4. Deployment Files
+- **requirements.txt**: Python dependencies
+- **Procfile**: Heroku configuration
+- **gunicorn.conf.py**: Gunicorn settings
 
-3. **Flask-Limiter**
-   - Protection contre les abus
-   - Quotas configurables
+## Non-Essential but Recommended Components
 
-4. **Flask-CORS**
-   - Gestion des requêtes cross-origin
-   - Sécurité API
+### 1. Development Tools
+- **.gitignore**: Git ignore patterns
+- **scripts/**: Utility scripts
+- **tests/**: Test suite
+- **docs/**: Documentation
 
-## Bonnes Pratiques
+### 2. Monitoring and Debugging
+- **flask_monitoringdashboard.db**: Performance monitoring
+- **logs/**: Application logs (if needed)
 
-1. **Configuration**
-   - Variables d'environnement pour les secrets
-   - Configurations différentes par environnement
+## Directory Purposes
 
-2. **Sécurité**
-   - Sessions sécurisées
-   - Cookies httpOnly
-   - Validation des uploads
+### src/
+- Core application logic
+- Route definitions
+- Service implementations
+- Utility functions
 
-3. **Performance**
-   - Cache adaptatif
-   - Compression des assets
-   - Optimisation des requêtes DB
+### config/
+- Configuration management
+- Environment-specific settings
+- Secret management
 
-## Évolution Future
+### static/
+- User-facing assets
+- Uploaded files (temporary)
+- CSS and JavaScript
 
-1. **Microservices**
-   - Service d'authentification séparé
-   - Service de traitement d'images
-   - Service de paiement
+### templates/
+- HTML templates
+- Reusable components
+- Page layouts
 
-2. **Base de Données**
-   - Migration vers PostgreSQL
-   - Sharding pour la scalabilité
-   - Réplication pour la haute disponibilité
+### scripts/
+- Development utilities
+- Deployment scripts
+- Maintenance tools
 
-3. **Cache**
-   - Cluster Redis
-   - CDN pour les assets
-   - Cache distribué 
+### tests/
+- Unit tests
+- Integration tests
+- Test fixtures
+
+### docs/
+- API documentation
+- Development guides
+- Deployment instructions
+
+### instance/
+- Environment-specific files
+- Sensitive configurations
+- Temporary data
+
+## Best Practices
+
+### 1. Code Organization
+- Keep related files together
+- Use clear, descriptive names
+- Maintain consistent structure
+
+### 2. Configuration
+- Use environment variables
+- Separate config by environment
+- Keep secrets in .env
+
+### 3. Security
+- Store uploads securely
+- Validate user input
+- Implement rate limiting
+
+### 4. Development
+- Follow PEP 8
+- Write tests
+- Document code
+
+### 5. Deployment
+- Use version control
+- Implement CI/CD
+- Monitor performance
+
+## Common Issues and Solutions
+
+### 1. File Organization
+- **Issue**: Files in root directory
+- **Solution**: Move to appropriate subdirectories
+
+### 2. Configuration
+- **Issue**: Hardcoded settings
+- **Solution**: Use environment variables
+
+### 3. Security
+- **Issue**: Exposed secrets
+- **Solution**: Use .env files
+
+### 4. Development
+- **Issue**: Missing documentation
+- **Solution**: Maintain README and docs
+
+## Required Environment Variables
+
+```env
+FLASK_APP=src
+FLASK_ENV=development
+SECRET_KEY=your-secret-key
+HUGGING_FACE_API_KEY=your-api-key
+REDIS_URL=redis://localhost:6379
+MAX_CONTENT_LENGTH=5242880
+```
+
+## Running the Application
+
+### Development
+```bash
+# Set environment variables
+export FLASK_APP=src
+export FLASK_ENV=development
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+flask run
+```
+
+### Production
+```bash
+# Using gunicorn
+gunicorn -c deployment/gunicorn.conf.py "src:create_app()"
+```
+
+## Maintenance
+
+### Regular Tasks
+1. Clean temporary files
+2. Update dependencies
+3. Run tests
+4. Monitor performance
+5. Backup data
+
+### Security
+1. Update dependencies
+2. Review access logs
+3. Check for vulnerabilities
+4. Update SSL certificates
+
+## Troubleshooting
+
+### Common Issues
+1. Missing dependencies
+2. Configuration errors
+3. Permission issues
+4. Storage problems
+
+### Solutions
+1. Check requirements.txt
+2. Verify .env file
+3. Check file permissions
+4. Clean temporary files 
