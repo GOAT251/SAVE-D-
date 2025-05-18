@@ -496,13 +496,22 @@ generateButton.addEventListener('click', () => {
     document.querySelector('.text-center p').classList.add('hidden');
     progressContainer.classList.remove('hidden');
     
-    // Simulate progress
+    // Préparation des données
+    const prompt = promptInput.value;
+    const duration = parseInt(durationSlider.value);
+    
+    // Mapper la valeur du slider de qualité à un niveau de qualité
+    const qualityMap = ['low', 'high', 'ultra'];
+    const quality = qualityMap[parseInt(qualitySlider.value) - 1];
+    
+    // Configurer le suivi de progression
     let progress = 0;
     const progressCircle = document.querySelector('.progress-ring-circle');
     const progressPercentage = document.getElementById('progressPercentage');
     const progressText = document.getElementById('progressText');
     const circumference = 2 * Math.PI * 45;
     
+    // Simuler le début du progrès
     const interval = setInterval(function() {
         progress += 1;
         const dashoffset = circumference - (progress / 100) * circumference;
@@ -513,24 +522,95 @@ generateButton.addEventListener('click', () => {
             progressText.textContent = "Analyse du prompt...";
         } else if (progress === 60) {
             progressText.textContent = "Génération des images...";
-        } else if (progress === 90) {
+        } else if (progress === 80) {
             progressText.textContent = "Création de la vidéo...";
         }
         
-        if (progress >= 100) {
+        // Arrêter à 90% et attendre la réponse de l'API
+        if (progress >= 90) {
             clearInterval(interval);
-            showResult();
+            progress = 90;
+            progressPercentage.textContent = progress + '%';
         }
     }, 50);
+    
+    // Appel à l'API
+    fetch('/web/ai-video/generate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            prompt: prompt,
+            duration: duration,
+            quality: quality
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Compléter la progression
+        const finalInterval = setInterval(function() {
+            progress += 2;
+            const dashoffset = circumference - (progress / 100) * circumference;
+            progressCircle.style.strokeDashoffset = dashoffset;
+            progressPercentage.textContent = progress + '%';
+            
+            if (progress >= 100) {
+                clearInterval(finalInterval);
+                progressText.textContent = "Terminé!";
+                
+                // Attendre un petit moment avant d'afficher le résultat
+                setTimeout(() => {
+                    showResult(data);
+                }, 500);
+            }
+        }, 50);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        progressText.textContent = "Erreur lors de la génération";
+        progressPercentage.textContent = "Échec";
+        
+        // Afficher l'erreur à l'utilisateur
+        alert('Une erreur est survenue lors de la génération de la vidéo. Veuillez réessayer plus tard.');
+        
+        // Réinitialiser l'interface après un délai
+        setTimeout(() => {
+            progressContainer.classList.add('hidden');
+            generateButton.classList.remove('hidden');
+            document.querySelector('.text-center p').classList.remove('hidden');
+        }, 3000);
+    });
 });
 
 // Show result
-function showResult() {
+function showResult(data) {
     // Hide progress
     progressContainer.classList.add('hidden');
     
     // Set the prompt text
     resultPrompt.textContent = promptInput.value;
+    
+    // Mettre à jour les tags de qualité et durée
+    const tagContainer = document.querySelector('.flex.mt-3');
+    tagContainer.innerHTML = `
+        <span class="tag mr-2">${durationSlider.value} seconde${durationSlider.value > 1 ? 's' : ''}</span>
+        <span class="tag">${qualityValue.textContent}</span>
+    `;
+    
+    // Si nous avons des données vidéo, les afficher
+    if (data.success && data.video_data) {
+        const videoPlaceholder = document.querySelector('.video-placeholder');
+        videoPlaceholder.innerHTML = `
+            <video controls class="w-full h-full rounded-lg">
+                <source src="data:video/mp4;base64,${data.video_data}" type="video/mp4">
+                Votre navigateur ne supporte pas la lecture de vidéos.
+            </video>
+        `;
+    } else {
+        // Garder le placeholder si pas de données vidéo
+        console.warn('Pas de données vidéo reçues ou erreur:', data.error || 'Raison inconnue');
+    }
     
     // Show result container
     resultContainer.classList.remove('hidden');
@@ -541,7 +621,19 @@ function showResult() {
 
 // Download video
 downloadVideoBtn.addEventListener('click', () => {
-    alert('Fonctionnalité de téléchargement en cours de développement. Bientôt disponible!');
+    // Vérifier si nous avons une vidéo générée
+    const videoSource = document.querySelector('.video-placeholder video source');
+    if (videoSource && videoSource.src) {
+        // Créer un lien temporaire pour télécharger la vidéo
+        const a = document.createElement('a');
+        a.href = videoSource.src;
+        a.download = `MOG_AI_Video_${Date.now()}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    } else {
+        alert('Aucune vidéo disponible pour le téléchargement.');
+    }
 });
 
 // Share video

@@ -1,7 +1,8 @@
 """Routes web pour la création de vidéos AI"""
 
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, current_app
 from ...extensions import limiter
+from ...services.ai_video.service import video_service
 
 ai_video_bp = Blueprint('ai_video', __name__, url_prefix='/ai-video')
 
@@ -23,15 +24,28 @@ def generate_video():
             }), 400
 
         prompt = data['prompt']
-
-        # TODO: Implement AI video generation service
-        # For now, return a placeholder response
-        return jsonify({
-            'success': True,
-            'message': 'Génération de vidéo en cours de développement'
-        })
+        
+        # Récupérer les paramètres optionnels
+        duration = int(data.get('duration', 3))
+        quality = data.get('quality', 'high')
+        
+        # Vérifier les valeurs
+        if duration < 1 or duration > 10:
+            duration = 3  # Valeur par défaut sécurisée
+        
+        if quality not in ['low', 'high', 'ultra']:
+            quality = 'high'  # Valeur par défaut sécurisée
+            
+        # Générer la vidéo avec notre service
+        result = video_service.generate_video_from_text(prompt, duration, quality)
+        
+        if result['success']:
+            return jsonify(result)
+        else:
+            return jsonify(result), 500
 
     except Exception as e:
+        current_app.logger.error(f"Error in generate_video route: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)
