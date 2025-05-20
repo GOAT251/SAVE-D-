@@ -6,6 +6,7 @@
 mog-ai/
 ├── .gitignore                     # Git ignore patterns (stays in root)
 ├── README.md                      # Project documentation (stays in root)
+├── wsgi.py                        # WSGI entry point for production deployment
 │
 ├── src/                          # Main application source code
 │   ├── __init__.py              # App initialization and factory
@@ -103,6 +104,20 @@ mog-ai/
 Only essential project files should remain in the root directory:
 - `.gitignore` - Git ignore patterns
 - `README.md` - Project documentation
+- `wsgi.py` - Production WSGI entry point
+- `app.py` - Development entry point
+
+### WSGI Configuration (`wsgi.py`)
+Le fichier `wsgi.py` est crucial pour le déploiement en production :
+- Sert d'interface entre le serveur web (Gunicorn, uWSGI) et l'application Flask
+- Permet le déploiement sur des serveurs de production
+- Suit le standard WSGI (Web Server Gateway Interface)
+- Sépare la configuration de développement de celle de production
+
+Exemple d'utilisation avec Gunicorn :
+```bash
+gunicorn wsgi:app
+```
 
 ### Deployment Files (`deployment/`)
 All deployment-related files:

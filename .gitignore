@@ -81,4 +81,27 @@ build/
 !.gitkeep
 
 # Large files
-GitHubDesktopSetup-x64.exe 
+GitHubDesktopSetup-x64.exe
+
+# Logs et données temporaires
+temp/
+
+# Fichiers système
+Thumbs.db
+
+# Dossiers spécifiques au projet
+D:/Projet/temp/
+uploads/
+results/
+models/
+
+# Fichiers de configuration sensibles
+.flaskenv
+*.pem
+*.key
+
+# Dépendances Node (si utilisées)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log* 

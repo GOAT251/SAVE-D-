@@ -7,6 +7,13 @@ M.O.G AI (Mastering Optical Grafting) is a comprehensive web platform that provi
 - Look analysis and style recommendations
 - Modern, responsive interface with Tailwind CSS
 
+## ⚠️ IMPORTANT: Installation Location
+**This project must be installed and run from the D: drive, NOT the C: drive.**
+- All project files should be on the D: drive
+- The virtual environment should be created on the D: drive
+- Pip cache should be configured to use the D: drive
+- Do not install any components on the C: drive
+
 ## Core Features
 
 ### 1. Face Swap
@@ -80,18 +87,19 @@ mog-ai/
 
 ### Setup Steps
 
-1. Clone and setup:
+1. Clone and setup on D: drive:
 ```bash
-git clone https://github.com/yourusername/mog-ai.git
-cd mog-ai
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-.\venv\Scripts\activate  # Windows
+# Make sure to clone to the D: drive
+git clone https://github.com/yourusername/mog-ai.git D:\mog-ai
+cd D:\mog-ai
+python -m venv D:\venv
+D:\venv\Scripts\activate  # Windows
 ```
 
-2. Install dependencies:
+2. Install dependencies with pip cache on D: drive:
 ```bash
-pip install -r requirements.txt
+mkdir D:\.pip_cache  # Create pip cache directory on D: drive
+pip install --cache-dir D:\.pip_cache -r requirements.txt
 npm install  # For frontend assets
 ```
 
@@ -112,8 +120,9 @@ flask db upgrade
 
 5. Run the application:
 ```bash
-flask run
+python app.py  # App will run on port 5001
 ```
+The application will be available at: http://127.0.0.1:5001
 
 ## Development Guidelines
 
@@ -223,12 +232,14 @@ class FaceSwapService:
 - Verify API keys
 - Ensure proper permissions
 - Monitor resource usage
+- Ensure all paths reference D: drive, not C: drive
 
 ### 2. Development
-- Use correct virtual env
-- Update dependencies
+- Use correct virtual env on D: drive
+- Update dependencies using the pip cache on D: drive
 - Clear cache when needed
 - Check logs for errors
+- Avoid storing temporary files on C: drive
 
 ## Contributing
 1. Fork the repository

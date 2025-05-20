@@ -9,4 +9,13 @@ requests==2.31.0
 gunicorn==21.2.0
 python-magic==0.4.27
 Werkzeug==3.0.1
-huggingface_hub==0.21.3 
+huggingface_hub==0.21.3
+transformers==4.38.2
+diffusers==0.25.1
+accelerate==0.27.2
+torch==2.2.1
+flask-migrate==4.0.5
+SQLAlchemy==2.0.27
+imageio==2.34.0
+imageio-ffmpeg==0.4.9
+numpy==1.26.4 
