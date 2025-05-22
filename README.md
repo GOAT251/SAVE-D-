@@ -99,7 +99,7 @@ D:\venv\Scripts\activate  # Windows
 2. Install dependencies with pip cache on D: drive:
 ```bash
 mkdir D:\.pip_cache  # Create pip cache directory on D: drive
-pip install --cache-dir D:\.pip_cache -r requirements.txt
+pip install --cache-dir D:\.pip_cache -r requirements.txt --only-binary=numpy
 npm install  # For frontend assets
 ```
 
@@ -254,4 +254,22 @@ MIT License - see LICENSE file
 ## Support
 - GitHub Issues
 - Documentation
-- Community forum 
+- Community forum
+
+### Important Dependencies Notes
+
+#### NumPy Compatibility
+- The project requires NumPy 1.26.3 specifically
+- Installation must be done with `--only-binary=numpy` flag to avoid compilation issues
+- This version ensures compatibility with PyTorch and other AI-related packages
+
+#### Installation Command
+```bash
+# Install dependencies with specific flags for NumPy
+pip install --cache-dir D:\.pip_cache -r requirements.txt --only-binary=numpy
+```
+
+#### Known Issues
+- NumPy 2.x is not compatible with this project
+- Some modules require NumPy 1.x compiled versions
+- If you encounter NumPy-related errors, try reinstalling with the above command 

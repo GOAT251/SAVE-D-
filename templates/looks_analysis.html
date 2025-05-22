@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}Analyse de Style - M.O.G AI{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .upload-area {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(15px);
+        border: 2px dashed rgba(255, 255, 255, 0.15);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        height: 320px;
+    }
+    
+    .upload-area:hover {
+        transform: translateY(-5px);
+        border-color: var(--gradient-end);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .upload-area.has-image {
+        border: none;
+    }
+    
+    .preview-container {
+        position: relative;
+        border-radius: 1rem;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .style-card {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .style-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(31, 38, 135, 0.2);
+    }
+    
+    .color-chip {
+        width: 60px;
+        height: 60px;
+        border-radius: 30px;
+        margin: 5px;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .color-chip:hover {
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .progress-bar {
+        height: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(90deg, #4F46E5, #7C3AED);
+        transition: width 1s ease-out;
+    }
+    
+    .recommendation-card {
+        background: rgba(79, 70, 229, 0.1);
+        border: 1px solid rgba(79, 70, 229, 0.2);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .recommendation-card:hover {
+        background: rgba(79, 70, 229, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    #loading {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        color: white;
+    }
+    
+    #loading.active {
+        display: flex;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex-1 overflow-y-auto p-8">
+    <!-- Loading overlay -->
+    <div id="loading" class="loading">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-white"></div>
+            <p class="mt-4 text-xl">Analyse en cours...</p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold gradient-text mb-2">Analyse de Style</h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">Découvrez votre style unique et obtenez des recommandations personnalisées basées sur l'analyse de vos tenues</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+            <!-- Zone de gauche : Upload et image -->
+            <div class="glass-effect rounded-xl p-6">
+                <h2 class="text-2xl font-bold gradient-text mb-4">Votre tenue</h2>
+                
+                <div id="uploadArea" class="upload-area flex flex-col items-center justify-center mb-4">
+                    <div id="uploadPrompt" class="text-center">
+                        <div class="mb-4">
+                            <i class="fas fa-tshirt text-4xl text-indigo-400"></i>
+                        </div>
+                        <p class="text-gray-300 mb-2">Glissez une photo ici ou cliquez pour parcourir</p>
+                        <p class="text-gray-500 text-sm">Format: JPG, PNG (max 5MB)</p>
+                    </div>
+                    
+                    <div id="previewContainer" class="preview-container hidden w-full h-full">
+                        <img id="inputImage" class="w-full h-full object-contain" src="" alt="Image à analyser">
+                    </div>
+                    
+                    <input type="file" id="imageUpload" accept="image/*" class="hidden">
+                </div>
+                
+                <div class="flex justify-center">
+                    <button id="analyzeBtn" class="btn-gradient text-white font-semibold py-2 px-6 rounded-lg opacity-50 cursor-not-allowed" disabled>
+                        <i class="fas fa-magic mr-2"></i>Analyser le style
+                    </button>
+                </div>
+            </div>
+
+            <!-- Zone de droite : Résultats -->
+            <div class="glass-effect rounded-xl p-6">
+                <h2 class="text-2xl font-bold gradient-text mb-4">Résultats de l'analyse</h2>
+                
+                <div id="resultsContainer" class="space-y-6 opacity-50">
+                    <!-- Style Analysis -->
+                    <div class="style-card p-4">
+                        <h3 class="font-semibold text-lg text-indigo-300 mb-2">Analyse du style</h3>
+                        <div id="styleScores" class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-300">Chic:</span>
+                                <span class="text-indigo-300" id="chicScore">--</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-300">Casual:</span>
+                                <span class="text-indigo-300" id="casualScore">--</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-300">Bohème:</span>
+                                <span class="text-indigo-300" id="bohemianScore">--</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-300">Sportif:</span>
+                                <span class="text-indigo-300" id="sportyScore">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Color Analysis -->
+                    <div class="style-card p-4">
+                        <h3 class="font-semibold text-lg text-indigo-300 mb-2">Couleurs dominantes</h3>
+                        <div id="colorPalette" class="flex flex-wrap justify-center gap-2 mt-4">
+                            <!-- Placeholder colors will be filled by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- Recommendations -->
+                    <div class="style-card p-4">
+                        <h3 class="font-semibold text-lg text-indigo-300 mb-2">Recommandations</h3>
+                        <div id="recommendations" class="space-y-2 text-gray-300">
+                            <p>Les recommandations s'afficheront après l'analyse.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+    const previewContainer = document.getElementById('previewContainer');
+    const inputImage = document.getElementById('inputImage');
+    const imageUpload = document.getElementById('imageUpload');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const loading = document.getElementById('loading');
+    const resultsContainer = document.getElementById('resultsContainer');
+    
+    // Drag and drop handling
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('border-indigo-500');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('border-indigo-500');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('border-indigo-500');
+        
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            handleImageSelect(e.dataTransfer.files[0]);
+        }
+    });
+    
+    // Click to upload
+    uploadArea.addEventListener('click', () => {
+        imageUpload.click();
+    });
+    
+    imageUpload.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            handleImageSelect(e.target.files[0]);
+        }
+    });
+    
+    function handleImageSelect(file) {
+        if (!file.type.startsWith('image/')) {
+            alert('Veuillez sélectionner une image.');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            inputImage.src = e.target.result;
+            uploadPrompt.classList.add('hidden');
+            previewContainer.classList.remove('hidden');
+            uploadArea.classList.add('has-image');
+            analyzeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            analyzeBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    // Analyze button click handler
+    analyzeBtn.addEventListener('click', async () => {
+        loading.classList.add('active');
+        resultsContainer.classList.add('opacity-50');
+        
+        try {
+            // Créer un FormData avec l'image
+            const formData = new FormData();
+            formData.append('image', imageUpload.files[0]);
+
+            // Envoyer la requête au serveur
+            const response = await fetch('/looks-analysis/analyze', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                // Utiliser les résultats réels du serveur
+                updateResults(data.results);
+            } else {
+                console.error('Erreur serveur:', data.error);
+                alert('Erreur: ' + (data.error || 'Une erreur est survenue'));
+                // Utiliser les résultats de démonstration en cas d'erreur
+                showDemoResults();
+            }
+            
+            resultsContainer.classList.remove('opacity-50');
+        } catch (error) {
+            console.error('Erreur de connexion:', error);
+            alert('Une erreur de connexion est survenue. Affichage des résultats de démonstration.');
+            // Utiliser les résultats de démonstration en cas d'erreur
+            showDemoResults();
+        } finally {
+            loading.classList.remove('active');
+        }
+    });
+    
+    // Fonction pour afficher des résultats de démonstration
+    function showDemoResults() {
+        const demoResults = {
+            style: {
+                "Chic": 65,
+                "Casual": 45,
+                "Bohemian": 20,
+                "Sporty": 30
+            },
+            colors: [
+                {hex: "#3B82F6", name: "Bleu", percentage: 40},
+                {hex: "#92400E", name: "Marron", percentage: 30},
+                {hex: "#FFFFFF", name: "Blanc", percentage: 20},
+                {hex: "#EF4444", name: "Rouge", percentage: 10}
+            ],
+            recommendations: [
+                "Essayez d'accessoiriser avec des bijoux en or pour compléter les tons bleus.",
+                "Pour un look plus raffiné, ajoutez une veste structurée par-dessus cette tenue.",
+                "Les chaussures de couleur neutre se marieront parfaitement avec cet ensemble."
+            ]
+        };
+        
+        updateResults(demoResults);
+    }
+    
+    function updateResults(results) {
+        // Mettre à jour les scores de style
+        document.getElementById('chicScore').textContent = `${results.style.Chic}%`;
+        document.getElementById('casualScore').textContent = `${results.style.Casual}%`;
+        document.getElementById('bohemianScore').textContent = `${results.style.Bohemian}%`;
+        document.getElementById('sportyScore').textContent = `${results.style.Sporty}%`;
+        
+        // Mettre à jour la palette de couleurs
+        const colorPalette = document.getElementById('colorPalette');
+        colorPalette.innerHTML = '';
+        results.colors.forEach(color => {
+            const chip = document.createElement('div');
+            chip.className = 'color-chip relative group';
+            chip.style.backgroundColor = color.hex;
+            
+            const tooltip = document.createElement('div');
+            tooltip.className = 'absolute -top-10 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white text-xs py-1 px-2 rounded hidden group-hover:block whitespace-nowrap';
+            tooltip.textContent = `${color.name} (${color.percentage}%)`;
+            
+            chip.appendChild(tooltip);
+            colorPalette.appendChild(chip);
+        });
+        
+        // Mettre à jour les recommandations
+        const recommendationsContainer = document.getElementById('recommendations');
+        recommendationsContainer.innerHTML = '';
+        results.recommendations.forEach(rec => {
+            const p = document.createElement('p');
+            p.className = 'text-gray-300';
+            p.innerHTML = `<i class="fas fa-lightbulb text-indigo-400 mr-2"></i>${rec}`;
+            recommendationsContainer.appendChild(p);
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %} 

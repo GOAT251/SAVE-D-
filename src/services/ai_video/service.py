@@ -1,60 +1,45 @@
 """
-Service d'IA pour la génération de vidéos à partir de texte utilisant ModelScope.
+Service d'IA pour la génération de vidéos à partir de texte utilisant l'API Hugging Face.
 """
 import os
 import base64
 import tempfile
+import logging
 from pathlib import Path
-import torch
-from diffusers import DiffusionPipeline
-import imageio
-import numpy as np
+import requests
+import json
 from flask import current_app
 
+# Configuration d'un logger standard 
+logger = logging.getLogger(__name__)
+
 class AIVideoService:
-    """Service pour la génération de vidéos via ModelScope."""
+    """Service pour la génération de vidéos via Text-to-Video."""
     
-    def __init__(self):
+    def __init__(self, api_key=None):
         """Initialise le service de génération de vidéo."""
-        self.api_key = os.environ.get('HUGGING_FACE_API_KEY')
-        self.model_name = os.environ.get('VIDEO_AI_MODEL', 'modelscope/damo-text-to-video-synthesis')
-        self.cache_dir = os.environ.get('MODEL_CACHE_PATH', 'D:/Projet/temp/models')
-        self.results_dir = os.environ.get('RESULTS_PATH', 'D:/Projet/temp/results')
+        # Permettre l'injection de la clé API ou la lire depuis l'environnement
+        self.api_key = api_key or os.getenv('HUGGING_FACE_API_KEY')
+        # Utiliser le nouveau nom de modèle correct
+        self.model_name = os.getenv('VIDEO_AI_MODEL', 'damo-vilab/text-to-video-ms-1.7b')
+        self.results_dir = os.getenv('RESULTS_PATH', 'D:/Projet/temp/results')
+        self.api_url = f"https://api-inference.huggingface.co/models/{self.model_name}"
         
         # Créer les dossiers nécessaires
-        Path(self.cache_dir).mkdir(parents=True, exist_ok=True)
         Path(self.results_dir).mkdir(parents=True, exist_ok=True)
         
         if not self.api_key:
-            current_app.logger.warning("HUGGING_FACE_API_KEY is not set")
-        
-        self.pipe = None
-    
-    def _load_model(self):
-        """Charge le modèle de génération de vidéo s'il n'est pas déjà chargé."""
-        if self.pipe is None:
-            if not self.api_key:
-                raise ValueError("Hugging Face API key is not configured")
-            
-            # Utiliser le cache sur le disque D
-            self.pipe = DiffusionPipeline.from_pretrained(
-                self.model_name,
-                torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-                cache_dir=self.cache_dir,
-                trust_remote_code=True,
-                use_auth_token=self.api_key
-            )
-            
-            # Déplacer sur GPU si disponible
-            if torch.cuda.is_available():
-                self.pipe = self.pipe.to("cuda")
-                current_app.logger.info("Model loaded on GPU")
-            else:
-                current_app.logger.info("Model loaded on CPU")
+            logger.warning("HUGGING_FACE_API_KEY is not set")
+            if current_app:
+                current_app.logger.warning("HUGGING_FACE_API_KEY is not set")
+        else:
+            logger.info("HUGGING_FACE_API_KEY is configured")
+            if current_app:
+                current_app.logger.info("HUGGING_FACE_API_KEY is configured")
     
     def generate_video_from_text(self, prompt, num_frames=16, height=256, width=256, fps=8):
         """
-        Génère une vidéo à partir d'un texte descriptif.
+        Génère une vidéo à partir d'un texte descriptif en utilisant l'API Hugging Face.
         
         Args:
             prompt: Description textuelle de la vidéo à générer
@@ -67,23 +52,46 @@ class AIVideoService:
             dict: Contient l'URL de la vidéo générée et d'autres informations
         """
         try:
-            # Charger le modèle
-            self._load_model()
+            if not self.api_key:
+                raise ValueError("Hugging Face API key is not configured")
+
+            # Préparer les headers pour l'API
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+
+            # Préparer les données pour l'API
+            payload = {
+                "inputs": prompt,
+                "parameters": {
+                    "num_frames": num_frames,
+                    "height": height,
+                    "width": width,
+                    "num_inference_steps": 25
+                }
+            }
+
+            # Appeler l'API
+            if current_app:
+                current_app.logger.info(f"Calling Hugging Face API for prompt: {prompt}")
+            else:
+                logger.info(f"Calling Hugging Face API for prompt: {prompt}")
+
+            response = requests.post(self.api_url, headers=headers, json=payload)
             
-            # Générer la vidéo
-            current_app.logger.info(f"Generating video for prompt: {prompt}")
-            video_frames = self.pipe(
-                prompt,
-                num_frames=num_frames,
-                height=height,
-                width=width,
-            ).frames
-            
-            # Convertir les frames en vidéo
-            video_path = self._save_video(video_frames, prompt, fps)
+            if response.status_code != 200:
+                error_msg = f"API request failed with status {response.status_code}: {response.text}"
+                raise ValueError(error_msg)
+
+            # Sauvegarder la vidéo reçue
+            video_path = self._save_video_from_response(response, prompt, fps)
             
             # Créer l'URL relative pour le frontend
-            relative_path = os.path.relpath(video_path, current_app.static_folder)
+            if current_app:
+                relative_path = os.path.relpath(video_path, current_app.static_folder)
+            else:
+                relative_path = os.path.relpath(video_path, "static")
             video_url = f"/static/{relative_path.replace(os.sep, '/')}"
             
             return {
@@ -98,18 +106,21 @@ class AIVideoService:
             }
             
         except Exception as e:
-            current_app.logger.error(f"Error generating video: {str(e)}")
+            if current_app:
+                current_app.logger.error(f"Error generating video: {str(e)}")
+            else:
+                logger.error(f"Error generating video: {str(e)}")
             return {
                 'success': False,
                 'error': str(e)
             }
     
-    def _save_video(self, frames, prompt, fps=8):
+    def _save_video_from_response(self, response, prompt, fps=8):
         """
-        Sauvegarde les frames en tant que fichier vidéo.
+        Sauvegarde la vidéo reçue de l'API.
         
         Args:
-            frames: Liste des frames de la vidéo
+            response: Réponse de l'API contenant la vidéo
             prompt: Texte utilisé pour générer la vidéo (utilisé pour le nom de fichier)
             fps: Images par seconde
             
@@ -122,16 +133,16 @@ class AIVideoService:
         video_filename = f"video_{safe_filename}_{timestamp}.mp4"
         video_path = os.path.join(self.results_dir, video_filename)
         
-        # Convertir les frames en format approprié pour imageio
-        if isinstance(frames[0], torch.Tensor):
-            frames = [frame.cpu().numpy() for frame in frames]
-        frames = [frame.astype(np.uint8) for frame in frames]
-        
         # Sauvegarder la vidéo
-        imageio.mimsave(video_path, frames, fps=fps)
-        current_app.logger.info(f"Video saved to {video_path}")
+        with open(video_path, 'wb') as f:
+            f.write(response.content)
+            
+        if current_app:
+            current_app.logger.info(f"Video saved to {video_path}")
+        else:
+            logger.info(f"Video saved to {video_path}")
         
         return video_path
 
-# Créer une instance du service
-video_service = AIVideoService() 
+# Ne pas créer l'instance ici, mais la créer dans app.py
+# video_service = AIVideoService() 

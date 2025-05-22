@@ -14,8 +14,10 @@ transformers==4.38.2
 diffusers==0.25.1
 accelerate==0.27.2
 torch==2.2.1
-flask-migrate==4.0.5
-SQLAlchemy==2.0.27
+numpy==1.26.4
 imageio==2.34.0
 imageio-ffmpeg==0.4.9
-numpy==1.26.4 
+opencv-python==4.11.0.86
+--only-binary=:all:
+open_clip_torch
+pytorch-lightning 

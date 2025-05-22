@@ -1,14 +1,35 @@
 from flask import Flask, render_template, request, jsonify, url_for, redirect
 import os
 from dotenv import load_dotenv
+from src.services.ai_video.service import AIVideoService
+from src.routes.web.looks_analysis import looks_analysis_bp
+from src.routes.web.facial_analysis import facial_analysis_bp
 
 # Charger les variables d'environnement
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), 'instance', '.env')
+if os.path.exists(env_path):
+    load_dotenv(env_path)
+    print(f"Fichier .env chargé depuis {env_path}")
+else:
+    print(f"ATTENTION: Fichier .env non trouvé à {env_path}")
 
 app = Flask(__name__, 
            static_folder='static',
            static_url_path='/static',
            template_folder='templates')
+
+# Enregistrer les blueprints
+app.register_blueprint(facial_analysis_bp)
+app.register_blueprint(looks_analysis_bp)
+
+# Créer l'instance du service dans le contexte de l'application
+video_service = AIVideoService()
+
+def init_video_service():
+    global video_service
+    if video_service is None:
+        video_service = AIVideoService()
+    return video_service
 
 @app.route('/')
 def index():
@@ -17,10 +38,6 @@ def index():
 @app.route('/face-swap')
 def face_swap():
     return render_template('face_swap/index.html', title="Face Swap")
-
-@app.route('/web/looks-analysis/')
-def looks_analysis():
-    return render_template('looks_analysis/index.html', title="Analyse de Look")
 
 @app.route('/web/ai-video/')
 def ai_video():
@@ -41,12 +58,43 @@ def face_swap_process():
 
 @app.route('/web/ai-video/generate', methods=['POST'])
 def ai_video_generate():
-    # Stub for generating AI video
-    return jsonify({
-        "success": True,
-        "message": "Vidéo générée avec succès",
-        "video_url": "/static/videos/example.mp4"
-    })
+    try:
+        data = request.get_json()
+        if not data or 'prompt' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'Le prompt est requis'
+            }), 400
+            
+        # S'assurer que le service est initialisé
+        service = init_video_service()
+            
+        # Paramètres optionnels avec valeurs par défaut
+        num_frames = data.get('num_frames', 16)
+        height = data.get('height', 256)
+        width = data.get('width', 256)
+        fps = data.get('fps', 8)
+        
+        # Générer la vidéo
+        result = service.generate_video_from_text(
+            prompt=data['prompt'],
+            num_frames=num_frames,
+            height=height,
+            width=width,
+            fps=fps
+        )
+        
+        if result['success']:
+            return jsonify(result)
+        else:
+            return jsonify(result), 500
+            
+    except Exception as e:
+        app.logger.error(f"Erreur lors de la génération de la vidéo: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @app.context_processor
 def utility_processor():
@@ -59,8 +107,10 @@ def utility_processor():
                 return '/'
             elif endpoint == 'face_swap':
                 return '/face-swap'
-            elif endpoint == 'looks_analysis':
-                return '/web/looks-analysis/'
+            elif endpoint == 'facial_analysis.index':
+                return '/facial-analysis'
+            elif endpoint == 'looks_analysis.index':
+                return '/looks-analysis'
             elif endpoint == 'ai_video':
                 return '/web/ai-video/'
             elif endpoint == 'dashboard':

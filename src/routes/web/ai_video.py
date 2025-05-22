@@ -2,9 +2,12 @@
 
 from flask import Blueprint, render_template, request, jsonify, current_app
 from ...extensions import limiter
-from ...services.ai_video.service import video_service
+from ...services.ai_video.service import AIVideoService
 
 ai_video_bp = Blueprint('ai_video', __name__, url_prefix='/ai-video')
+
+# Créer une instance du service
+video_service = AIVideoService()
 
 @ai_video_bp.route('/')
 def index():

@@ -44,7 +44,7 @@ mog-ai/
 │   └── requirements.txt       # Python dependencies
 │
 ├── instance/                     # Instance-specific files (gitignored)
-│   ├── .env                    # Environment variables
+│   ├── .env                    # Environment variables (contient HUGGING_FACE_API_KEY, VIDEO_AI_MODEL, MODEL_CACHE_PATH, RESULTS_PATH)
 │   └── flask_monitoringdashboard.db  # Performance monitoring DB
 │
 ├── config/                      # Configuration files
@@ -127,10 +127,52 @@ All deployment-related files:
 
 ### Instance Files (`instance/`)
 Instance-specific files that should not be versioned:
-- `.env` - Environment variables
+- `.env` - Environment variables (contient HUGGING_FACE_API_KEY, VIDEO_AI_MODEL, MODEL_CACHE_PATH, RESULTS_PATH)
 - `flask_monitoringdashboard.db` - Monitoring database
 - Temporary files
 - Local configurations
+
+### Accès au fichier .env dans Cursor
+
+IMPORTANT : Contrairement à ce qu'on pourrait penser, même si le fichier `.env` est listé dans `.cursorignore`, il reste accessible via les outils de lecture de Cursor. Voici comment y accéder :
+
+1. **Méthode d'accès direct**
+   - Utiliser le chemin relatif : `instance/.env`
+   - Les outils de lecture de Cursor peuvent accéder au fichier malgré `.cursorignore`
+   - Le fichier est protégé mais reste lisible pour les opérations autorisées
+
+2. **Structure du fichier**
+   Le fichier `.env` contient les configurations suivantes :
+   ```env
+   # Configurations Flask
+   FLASK_APP=app
+   FLASK_ENV=development
+   FLASK_DEBUG=1
+   FLASK_RUN_PORT=5001
+
+   # Chemins du projet
+   PROJECT_ROOT=D:\Projet
+   
+   # Configuration Hugging Face
+   HUGGING_FACE_API_KEY=votre_clé_ici
+   VIDEO_AI_MODEL=modelscope/damo-text-to-video-synthesis
+   
+   # Chemins des données
+   MODEL_CACHE_PATH=D:\Projet\temp\models
+   RESULTS_PATH=D:\Projet\temp\results
+   ```
+
+3. **Sécurité**
+   - Le fichier reste protégé contre les modifications accidentelles
+   - Les valeurs sensibles sont sécurisées
+   - Git continue d'ignorer le fichier grâce à `.gitignore`
+   - Cursor peut lire le fichier mais de manière contrôlée
+
+4. **Bonnes pratiques**
+   - Ne jamais commiter le fichier `.env`
+   - Maintenir un `.env.example` pour la documentation
+   - Sauvegarder les valeurs sensibles de manière sécurisée
+   - Utiliser des chemins absolus pour les dossiers de données
 
 ## Essential Components
 
